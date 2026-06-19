@@ -2,7 +2,7 @@
   <div class="app">
     <TheSidebar @logout="handleLogout" />
     <main class="main">
-      <header class="topbar">
+      <header v-if="showLayoutHeader" class="topbar">
         <div>
           <h1 id="viewTitle">{{ currentRouteName }}</h1>
           <p id="viewSubtitle">{{ currentRouteMeta?.subtitle || '' }}</p>
@@ -23,6 +23,7 @@ import { useRouter, useRoute } from 'vue-router'
 import TheSidebar from '../components/TheSidebar.component.vue'
 import { authService } from '../../iam/services/auth.service.js'
 import { http } from '../../shared/services/http.instance.js'
+import { toastService } from '../../shared/services/toast.service.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -33,6 +34,10 @@ const currentRouteName = computed(() => {
 
 const currentRouteMeta = computed(() => route.meta || {})
 
+const showLayoutHeader = computed(() => {
+  return !['dashboard', 'clients', 'vehicles'].includes(route.name)
+})
+
 function reloadCurrentView() {
   router.replace({ path: route.path })
 }
@@ -40,15 +45,16 @@ function reloadCurrentView() {
 async function checkHealth() {
   try {
     await http.get('/api/v1/health', { noAuth: true })
-    alert('Backend health OK')
+    toastService.success('Backend health OK')
   } catch (err) {
-    alert('Backend health: DOWN - ' + err.message)
+    toastService.error(`Backend health: DOWN - ${err.message}`)
   }
 }
 
 function handleLogout() {
-  authService.logout()
-  router.push('/login')
+  authService.logout().finally(() => {
+    router.push('/login')
+  })
 }
 </script>
 

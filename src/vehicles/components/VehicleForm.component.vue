@@ -1,148 +1,412 @@
 <template>
-  <form class="card form-card" @submit.prevent="handleSubmit">
-    <h2>Create Vehicle</h2>
-    <div class="two-cols">
-      <label>Brand
-        <input name="brand" v-model="form.brand" required />
-      </label>
-      <label>Model
-        <input name="model" v-model="form.model" required />
-      </label>
-      <label>Year
-        <input name="year" type="number" min="1990" max="2035" v-model.number="form.year" required />
-      </label>
-      <label>Vehicle Type
-        <select name="vehicleType" v-model="form.vehicleType">
-          <option value="SEDAN">SEDAN</option>
-          <option value="SUV">SUV</option>
-          <option value="PICKUP">PICKUP</option>
-          <option value="HATCHBACK">HATCHBACK</option>
-          <option value="VAN">VAN</option>
-          <option value="OTHER">OTHER</option>
-        </select>
-      </label>
-      <label>Commercial Price
-        <input name="commercialPrice" type="number" min="0" step="0.01" v-model.number="form.commercialPrice" required />
-      </label>
-      <label>Currency
-        <select name="currency" v-model="form.currency">
-          <option>USD</option>
-          <option>PEN</option>
-        </select>
-      </label>
-    </div>
-    <label>Description
-      <textarea name="description" v-model="form.description"></textarea>
-    </label>
-    <label>Image URL
-      <input name="imageUrl" v-model="form.imageUrl" />
-    </label>
-    <button class="primary" type="submit" :disabled="loading">
-      {{ loading ? 'Saving...' : 'Save Vehicle' }}
-    </button>
-    <p v-if="error" class="error">{{ error }}</p>
-  </form>
+  <div class="register-page">
+    <header class="register-header">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <button type="button" class="crumb-link" @click="$emit('cancel')">Vehicle Inventory</button>
+        <span class="crumb-separator">›</span>
+        <span class="crumb-current">{{ isEdit ? 'Edit' : 'Registration' }}</span>
+      </nav>
+      <h1>{{ isEdit ? 'Edit Vehicle' : 'Register New Vehicle' }}</h1>
+      <p>
+        {{
+          isEdit
+            ? 'Update asset specifications and valuation data to keep the portfolio aligned with current market conditions.'
+            : 'Register a new asset in the portfolio with its technical profile and market valuation for loan simulations.'
+        }}
+      </p>
+    </header>
+
+    <form class="register-form" @submit.prevent="handleSubmit">
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM5 11l1.5-4.5h11L19 11H5z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
+          <h2>Asset Identity</h2>
+        </div>
+        <div class="field-grid">
+          <label>
+            Brand
+            <input ref="firstFieldRef" v-model="form.brand" placeholder="e.g., Porsche" required />
+          </label>
+          <label>
+            Model
+            <input v-model="form.model" placeholder="e.g., Taycan" required />
+          </label>
+          <label>
+            Year
+            <input v-model.number="form.year" type="number" min="1990" max="2035" required />
+          </label>
+          <label>
+            Vehicle Type
+            <select v-model="form.vehicleType">
+              <option value="SEDAN">Sports Sedan</option>
+              <option value="SUV">Off-Road SUV</option>
+              <option value="PICKUP">Pickup Truck</option>
+              <option value="HATCHBACK">Hatchback</option>
+              <option value="VAN">Van</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
+          <h2>Media &amp; Description</h2>
+        </div>
+        <div class="field-grid">
+          <label class="full-width">
+            Description
+            <textarea v-model="form.description" placeholder="Technical notes, trim level, condition..." />
+          </label>
+          <label class="full-width">
+            Image URL
+            <input v-model="form.imageUrl" placeholder="https://..." />
+          </label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M3.5 18.5 9 13l3 3 7.5-7.5L22 12.5 12 22.5 3.5 18.5z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
+          <h2>Market Valuation</h2>
+        </div>
+        <div class="field-grid">
+          <label>
+            Commercial Price
+            <div class="money-input">
+              <span>$</span>
+              <input
+                v-model.number="form.commercialPrice"
+                type="number"
+                min="0.01"
+                step="0.01"
+                placeholder="0.00"
+                required
+              />
+            </div>
+          </label>
+          <label>
+            Currency
+            <select v-model="form.currency">
+              <option value="USD">USD</option>
+              <option value="PEN">PEN</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <footer class="form-actions">
+        <button type="button" class="cancel-btn" @click="$emit('cancel')">Cancel</button>
+        <button type="submit" class="save-btn" :disabled="loading">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M17 3H5a2 2 0 0 0-2 2v14l4-4h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12H6.17L3 17.17V5h14v10z"
+              fill="currentColor"
+            />
+          </svg>
+          {{ loading ? 'Saving...' : isEdit ? 'Update Vehicle' : 'Save Vehicle' }}
+        </button>
+      </footer>
+
+      <p v-if="error" class="error">{{ error }}</p>
+    </form>
+  </div>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed } from 'vue'
 
-const emit = defineEmits(['saved'])
+const props = defineProps({
+  loading: { type: Boolean, default: false },
+  mode: { type: String, default: 'create' }
+})
 
-const form = reactive({
-  brand: 'Toyota',
-  model: 'Corolla',
-  year: 2025,
+const emit = defineEmits(['saved', 'cancel'])
+
+const isEdit = computed(() => props.mode === 'edit')
+
+const emptyForm = () => ({
+  brand: '',
+  model: '',
+  year: new Date().getFullYear(),
   vehicleType: 'SEDAN',
-  commercialPrice: 15000,
+  commercialPrice: null,
   currency: 'USD',
-  description: 'Created from Vue frontend',
+  description: '',
   imageUrl: ''
 })
 
-const loading = ref(false)
+const form = reactive(emptyForm())
+const firstFieldRef = ref(null)
 const error = ref('')
 
-async function handleSubmit() {
-  loading.value = true
+function resetForm() {
+  Object.assign(form, emptyForm())
   error.value = ''
-  try {
-    emit('saved', { ...form })
-  } catch (err) {
-    error.value = err.message
-  } finally {
-    loading.value = false
-  }
 }
+
+function loadForm(vehicle = {}) {
+  Object.assign(form, {
+    brand: vehicle.brand || '',
+    model: vehicle.model || '',
+    year: vehicle.year || new Date().getFullYear(),
+    vehicleType: vehicle.vehicleType || 'SEDAN',
+    commercialPrice: vehicle.commercialPrice ?? vehicle.price ?? null,
+    currency: vehicle.currency || 'USD',
+    description: vehicle.description || '',
+    imageUrl: vehicle.imageUrl || ''
+  })
+  error.value = ''
+}
+
+function focusFirstField() {
+  firstFieldRef.value?.focus?.()
+}
+
+function handleSubmit() {
+  error.value = ''
+  emit('saved', { ...form })
+}
+
+defineExpose({ resetForm, loadForm, focusFirstField })
 </script>
 
 <style scoped>
-.card {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 12px 30px rgba(8, 38, 74, 0.08);
-  border: 1px solid #edf1f6;
-}
-.form-card {
+.register-page {
   display: grid;
-  gap: 18px;
+  gap: 24px;
 }
-.two-cols {
+
+.register-header h1 {
+  margin: 12px 0 0;
+  font-size: 32px;
+  color: #0b1f3a;
+}
+
+.register-header p {
+  margin: 10px 0 0;
+  max-width: 760px;
+  color: #6f7d8f;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.crumb-link {
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+
+.crumb-separator,
+.crumb-current {
+  color: #8a96a3;
+}
+
+.register-form {
+  display: grid;
+  gap: 20px;
+}
+
+.form-section {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #edf1f6;
+  box-shadow: 0 8px 24px rgba(8, 38, 74, 0.06);
+  padding: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-left: 12px;
+  border-left: 4px solid #08264a;
+}
+
+.section-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #eef2f6;
+  color: #08264a;
+  display: grid;
+  place-items: center;
+}
+
+.section-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.section-title h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #0b1f3a;
+}
+
+.field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
 }
+
 label {
   display: grid;
   gap: 8px;
-  font-size: 12px;
-  text-transform: uppercase;
-  color: #3f4957;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6f7d8f;
 }
-input, select, textarea {
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+input,
+select,
+textarea {
   width: 100%;
   border: 1px solid transparent;
-  background: #dfe4e9;
-  border-radius: 8px;
-  padding: 12px 14px;
+  background: #e8ecf1;
+  border-radius: 10px;
+  padding: 13px 14px;
   color: #1d2632;
   outline: none;
   font: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
 }
-input:focus, select:focus, textarea:focus {
+
+input:focus,
+select:focus,
+textarea:focus {
   border-color: #9bbcff;
   background: #eef4ff;
 }
+
 textarea {
-  min-height: 96px;
+  min-height: 110px;
   resize: vertical;
 }
-.primary {
-  background: #08264a;
-  color: white;
-  border: 0;
-  border-radius: 8px;
-  padding: 12px 18px;
+
+.money-input {
+  display: flex;
+  align-items: center;
+  background: #e8ecf1;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.money-input span {
+  padding: 0 12px;
+  color: #6f7d8f;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.03em;
+}
+
+.money-input input {
+  border-radius: 0;
+  background: transparent;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.cancel-btn,
+.save-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-weight: 700;
   cursor: pointer;
 }
-.primary:disabled {
-  opacity: 0.6;
+
+.cancel-btn {
+  background: #e8ecf1;
+  color: #26394e;
+}
+
+.save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #08264a;
+  color: #ffffff;
+}
+
+.save-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.save-btn:disabled {
+  opacity: 0.7;
   cursor: not-allowed;
 }
+
 .error {
   color: #8f1521;
-  background: #f9d9dc;
-  padding: 12px;
-  border-radius: 8px;
+  background: #fef2f2;
+  padding: 12px 14px;
+  border-radius: 10px;
 }
+
 @media (max-width: 760px) {
-  .two-cols {
+  .field-grid {
     grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

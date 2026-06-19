@@ -1,13 +1,18 @@
-const DEFAULT_API_BASE = import.meta.env.VITE_API_BASE || 'https://backend-capital-cruise-deploy-482841496133.southamerica-west1.run.app'
+import { ApiError, parseApiError } from '../utils/api-error.util.js'
+
+const DEFAULT_API_BASE =
+    import.meta.env.VITE_API_BASE ??
+    (import.meta.env.DEV ? '' : 'https://backend-capital-cruise-deploy-482841496133.southamerica-west1.run.app')
 
 class HttpInstance {
     constructor() {
-        this.apiBase = DEFAULT_API_BASE
+        this.apiBase = DEFAULT_API_BASE.replace(/\/$/, '')
         this.accessToken = localStorage.getItem('cc_access_token') || ''
+        this.onUnauthorized = null
     }
 
     setApiBase(baseUrl) {
-        this.apiBase = baseUrl.replace(/\/$/, '')
+        this.apiBase = (baseUrl || '').replace(/\/$/, '')
     }
 
     setAccessToken(token) {
@@ -33,10 +38,16 @@ class HttpInstance {
             headers.Authorization = `Bearer ${this.accessToken}`
         }
 
-        const response = await fetch(`${this.apiBase}${path}`, {
-            ...options,
-            headers
-        })
+        let response
+
+        try {
+            response = await fetch(`${this.apiBase}${path}`, {
+                ...options,
+                headers
+            })
+        } catch {
+            throw new ApiError('No se pudo conectar con el servidor. Verifique su conexión.', 0)
+        }
 
         const contentType = response.headers.get('content-type') || ''
         let body = null
@@ -47,9 +58,15 @@ class HttpInstance {
                 : await response.text().catch(() => null)
         }
 
+        if (response.status === 401 && !options.noAuth && !options._retry && this.onUnauthorized) {
+            const recovered = await this.onUnauthorized()
+            if (recovered) {
+                return this.request(path, { ...options, _retry: true })
+            }
+        }
+
         if (!response.ok) {
-            const detail = typeof body === 'string' ? body : JSON.stringify(body, null, 2)
-            throw new Error(`${response.status} ${response.statusText}\n${detail || ''}`)
+            throw new ApiError(parseApiError(body, response.status), response.status, body)
         }
 
         return body

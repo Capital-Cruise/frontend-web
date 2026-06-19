@@ -63,6 +63,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { toastService } from '../../shared/services/toast.service.js'
 
 const props = defineProps({
   operationId: { type: String, default: '' }
@@ -86,7 +87,7 @@ const detailCards = computed(() => {
 
 function loadDetail() {
   if (!props.operationId) {
-    alert('Provide operationId')
+    toastService.warning('Provide operation ID')
     return
   }
   emit('load-detail', props.operationId)
@@ -94,7 +95,7 @@ function loadDetail() {
 
 function createShare() {
   if (!props.operationId) {
-    alert('Load an operation first')
+    toastService.warning('Load an operation first')
     return
   }
   emit('share', props.operationId)

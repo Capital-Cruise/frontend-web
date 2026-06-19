@@ -360,6 +360,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { toastService } from '../../shared/services/toast.service.js'
 
 const props = defineProps({
   clients: { type: Array, default: () => [] },
@@ -645,7 +646,7 @@ async function handleCalculate() {
     const request = buildQuoteRequest()
     emit('calculate', request)
   } catch (err) {
-    alert(err.message)
+    toastService.error(err.message)
   }
 }
 

@@ -12,6 +12,7 @@ import { useRouter } from 'vue-router'
 import SimulationForm from '../components/SimulationForm.component.vue'
 import { clientService } from '../../clients/services/client.service.js'
 import { vehicleService } from '../../vehicles/services/vehicle.service.js'
+import { toastService } from '../../shared/services/toast.service.js'
 
 const router = useRouter()
 const clients = ref([])
@@ -37,7 +38,7 @@ async function loadBootstrapData() {
       }, 100)
     }
   } catch (err) {
-    alert(err.message)
+    toastService.error(err.message)
   }
 }
 

@@ -1,9 +1,10 @@
 <template>
   <router-view />
+  <ToastContainer />
 </template>
 
 <script setup>
-// App root component
+import ToastContainer from './shared/components/ToastContainer.component.vue'
 </script>
 
 <style>

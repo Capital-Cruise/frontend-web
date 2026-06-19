@@ -12,7 +12,8 @@ export class Client {
         this.monthlyIncome = data.monthlyIncome || 0
         this.address = data.address || ''
         this.notes = data.notes || ''
-        this.displayName = data.displayName || ''
+        this.createdAt = data.createdAt || ''
+        this.updatedAt = data.updatedAt || ''
     }
 
     get displayName() {

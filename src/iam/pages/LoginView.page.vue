@@ -1,18 +1,11 @@
 <template>
   <div class="login-view">
-    <LoginCard @login-success="onLoginSuccess" />
+    <LoginCard />
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
 import LoginCard from '../components/LoginCard.component.vue'
-
-const router = useRouter()
-
-function onLoginSuccess(user) {
-  router.push('/')
-}
 </script>
 
 <style scoped>
@@ -20,6 +13,7 @@ function onLoginSuccess(user) {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 32px;
+  padding: 40px 24px;
+  background: #f4f7fb;
 }
 </style>

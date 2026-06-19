@@ -65,6 +65,7 @@
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { loanService } from '../services/loan.service.js'
+import { toastService } from '../../shared/services/toast.service.js'
 
 const route = useRoute()
 const operationId = ref(route.params.id || '')
@@ -84,7 +85,7 @@ const detailCards = computed(() => {
 
 async function loadDetail() {
   if (!operationId.value) {
-    alert('Provide operationId')
+    toastService.warning('Provide operation ID')
     return
   }
   try {
@@ -97,20 +98,20 @@ async function loadDetail() {
     schedule.value = Array.isArray(scheduleData) ? scheduleData : loanService.unwrapPage(scheduleData)
     indicators.value = indicatorsData
   } catch (err) {
-    alert(err.message)
+    toastService.error(err.message)
   }
 }
 
 async function createShare() {
   if (!operationId.value) {
-    alert('Load an operation first')
+    toastService.warning('Load an operation first')
     return
   }
   try {
     const data = await loanService.createPublicShare(operationId.value)
-    alert(`Share created: ${data.shareUrl || data.shareToken}`)
+    toastService.success(`Share created: ${data.shareUrl || data.shareToken}`)
   } catch (err) {
-    alert(err.message)
+    toastService.error(err.message)
   }
 }
 

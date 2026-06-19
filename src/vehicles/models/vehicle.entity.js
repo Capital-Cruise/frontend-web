@@ -11,6 +11,28 @@ export class Vehicle {
         this.description = data.description || ''
         this.imageUrl = data.imageUrl || ''
         this.vehicleLabel = data.vehicleLabel || ''
+        this.createdAt = data.createdAt || ''
+        this.updatedAt = data.updatedAt || ''
+    }
+
+    get cardTitle() {
+        return [this.brand, this.model].filter(Boolean).join(' - ') || this.vehicleLabel || `Vehicle ${this.identifier}`
+    }
+
+    get typeLabel() {
+        const labels = {
+            SEDAN: 'Sports Sedan',
+            SUV: 'Off-Road SUV',
+            PICKUP: 'Pickup Truck',
+            HATCHBACK: 'Hatchback',
+            VAN: 'Van',
+            OTHER: 'Other'
+        }
+        return labels[this.vehicleType] || this.vehicleType || 'Vehicle'
+    }
+
+    get subtitle() {
+        return [this.year, this.typeLabel].filter(Boolean).join(' • ')
     }
 
     get displayName() {

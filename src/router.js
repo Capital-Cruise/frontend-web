@@ -20,11 +20,11 @@ const routes = [
         component: DefaultLayout,
         meta: { requiresAuth: true },
         children: [
-            { path: '', name: 'dashboard', component: DashboardView },
-            { path: 'clients', name: 'clients', component: ClientsView },
-            { path: 'vehicles', name: 'vehicles', component: VehiclesView },
-            { path: 'simulation', name: 'simulation', component: SimulationView },
-            { path: 'operations', name: 'operations', component: OperationsView },
+            { path: '', name: 'dashboard', component: DashboardView, meta: { title: 'Dashboard' } },
+            { path: 'clients', name: 'clients', component: ClientsView, meta: { title: 'Clients', subtitle: 'Manage advisory clients.' } },
+            { path: 'vehicles', name: 'vehicles', component: VehiclesView, meta: { title: 'Vehicles', subtitle: 'Manage vehicle inventory.' } },
+            { path: 'simulation', name: 'simulation', component: SimulationView, meta: { title: 'New Simulation', subtitle: 'Create a new loan operation.' } },
+            { path: 'operations', name: 'operations', component: OperationsView, meta: { title: 'Saved Operations', subtitle: 'Review saved financial simulations.' } },
             { path: 'operation/:id', name: 'operation-detail', component: OperationDetailView, props: true }
         ]
     },

@@ -1,147 +1,424 @@
 <template>
-  <form class="card form-card" @submit.prevent="handleSubmit">
-    <h2>Create Client</h2>
-    <div class="two-cols">
-      <label>First Name
-        <input name="firstName" v-model="form.firstName" required />
-      </label>
-      <label>Last Name
-        <input name="lastName" v-model="form.lastName" required />
-      </label>
-      <label>Document Type
-        <select name="documentType" v-model="form.documentType">
-          <option value="DNI">DNI</option>
-          <option value="PASSPORT">PASSPORT</option>
-          <option value="CE">CE</option>
-          <option value="RUC">RUC</option>
-        </select>
-      </label>
-      <label>Document Number
-        <input name="documentNumber" v-model="form.documentNumber" required />
-      </label>
-      <label>Email
-        <input name="email" type="email" v-model="form.email" />
-      </label>
-      <label>Phone
-        <input name="phone" v-model="form.phone" />
-      </label>
-      <label>Monthly Income
-        <input name="monthlyIncome" type="number" min="0" step="0.01" v-model.number="form.monthlyIncome" />
-      </label>
-    </div>
-    <label>Address
-      <input name="address" v-model="form.address" />
-    </label>
-    <label>Notes
-      <textarea name="notes" v-model="form.notes"></textarea>
-    </label>
-    <button class="primary" type="submit" :disabled="loading">
-      {{ loading ? 'Saving...' : 'Save Client' }}
-    </button>
-    <p v-if="error" class="error">{{ error }}</p>
-  </form>
+  <div class="register-page">
+    <header class="register-header">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <button type="button" class="crumb-link" @click="$emit('cancel')">Client Directory</button>
+        <span class="crumb-separator">›</span>
+        <span class="crumb-current">{{ isEdit ? 'Edit' : 'Registration' }}</span>
+      </nav>
+      <h1>{{ isEdit ? 'Edit Client' : 'Register New Client' }}</h1>
+      <p>
+        {{
+          isEdit
+            ? 'Update the client profile and keep the financial registry aligned with the latest information.'
+            : "Initialize the credit simulation by providing the client's architectural financial profile."
+        }}
+      </p>
+    </header>
+
+    <form class="register-form" @submit.prevent="handleSubmit">
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.62-9.6 4.8V22h19.2v-2.8c0-3.18-6.4-4.8-9.6-4.8z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
+          <h2>Personal Identity</h2>
+        </div>
+        <div class="field-grid">
+          <label>
+            First Name
+            <input ref="firstFieldRef" v-model="form.firstName" placeholder="e.g., Jonathan" required />
+          </label>
+          <label>
+            Last Name
+            <input v-model="form.lastName" placeholder="e.g., Wick" required />
+          </label>
+          <label>
+            Document Type
+            <select v-model="form.documentType">
+              <option value="DNI">National ID / Passport</option>
+              <option value="PASSPORT">Passport</option>
+              <option value="CE">Foreign Resident Card</option>
+              <option value="RUC">Tax ID (RUC)</option>
+            </select>
+          </label>
+          <label>
+            Document Number
+            <input v-model="form.documentNumber" placeholder="XX-XXXX-XXXXX" required />
+          </label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
+          <h2>Connectivity &amp; Address</h2>
+        </div>
+        <div class="field-grid">
+          <label>
+            Email Address
+            <input v-model="form.email" type="email" placeholder="client@capitalcruise.com" />
+          </label>
+          <label>
+            Phone Number
+            <input v-model="form.phone" placeholder="+1 (555) 000-0000" />
+          </label>
+          <label class="full-width">
+            Residential Address
+            <input v-model="form.address" placeholder="Street name, Number, Suite, City, Zip" />
+          </label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M3.5 18.5 9 13l3 3 7.5-7.5L22 12.5 12 22.5 3.5 18.5z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
+          <h2>Financial Framework</h2>
+        </div>
+        <div class="field-grid">
+          <label>
+            Monthly Income
+            <div class="money-input">
+              <span>$</span>
+              <input
+                v-model.number="form.monthlyIncome"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+              />
+            </div>
+            <small>
+              This figure is critical for determining the Debt-to-Income (DTI) ratio and final
+              credit score ceiling.
+            </small>
+          </label>
+          <label class="full-width">
+            Internal Notes
+            <textarea v-model="form.notes" placeholder="Confidential advisor remarks..." />
+          </label>
+        </div>
+      </section>
+
+      <footer class="form-actions">
+        <button type="button" class="cancel-btn" @click="$emit('cancel')">Cancel</button>
+        <button type="submit" class="save-btn" :disabled="loading">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M17 3H5a2 2 0 0 0-2 2v14l4-4h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12H6.17L3 17.17V5h14v10z"
+              fill="currentColor"
+            />
+          </svg>
+          {{ loading ? 'Saving...' : isEdit ? 'Update Client' : 'Save Client' }}
+        </button>
+      </footer>
+
+      <p v-if="error" class="error">{{ error }}</p>
+    </form>
+  </div>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed } from 'vue'
 
-const emit = defineEmits(['saved'])
-
-const form = reactive({
-  firstName: 'Demo',
-  lastName: 'Client',
-  documentType: 'DNI',
-  documentNumber: '90000999',
-  email: 'demo.client@capitalcruise.local',
-  phone: '999009999',
-  monthlyIncome: 6000,
-  address: 'Lima, Perú',
-  notes: 'Created from Vue frontend'
+const props = defineProps({
+  loading: { type: Boolean, default: false },
+  mode: { type: String, default: 'create' }
 })
 
-const loading = ref(false)
+const emit = defineEmits(['saved', 'cancel'])
+
+const isEdit = computed(() => props.mode === 'edit')
+
+const emptyForm = () => ({
+  firstName: '',
+  lastName: '',
+  documentType: 'DNI',
+  documentNumber: '',
+  email: '',
+  phone: '',
+  monthlyIncome: null,
+  address: '',
+  notes: ''
+})
+
+const form = reactive(emptyForm())
+const firstFieldRef = ref(null)
 const error = ref('')
 
-async function handleSubmit() {
-  loading.value = true
+function resetForm() {
+  Object.assign(form, emptyForm())
   error.value = ''
-  try {
-    emit('saved', { ...form })
-  } catch (err) {
-    error.value = err.message
-  } finally {
-    loading.value = false
-  }
 }
+
+function loadForm(client = {}) {
+  Object.assign(form, {
+    firstName: client.firstName || '',
+    lastName: client.lastName || '',
+    documentType: client.documentType || 'DNI',
+    documentNumber: client.documentNumber || '',
+    email: client.email || '',
+    phone: client.phone || '',
+    monthlyIncome: client.monthlyIncome ?? 0,
+    address: client.address || '',
+    notes: client.notes || ''
+  })
+  error.value = ''
+}
+
+function focusFirstField() {
+  firstFieldRef.value?.focus?.()
+}
+
+function handleSubmit() {
+  error.value = ''
+  emit('saved', { ...form })
+}
+
+defineExpose({ resetForm, loadForm, focusFirstField })
 </script>
 
 <style scoped>
-.card {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 12px 30px rgba(8, 38, 74, 0.08);
-  border: 1px solid #edf1f6;
-}
-.form-card {
+.register-page {
   display: grid;
-  gap: 18px;
+  gap: 24px;
 }
-.two-cols {
+
+.register-header h1 {
+  margin: 12px 0 0;
+  font-size: 32px;
+  color: #0b1f3a;
+}
+
+.register-header p {
+  margin: 10px 0 0;
+  max-width: 760px;
+  color: #6f7d8f;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.crumb-link {
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+
+.crumb-separator,
+.crumb-current {
+  color: #8a96a3;
+}
+
+.register-form {
+  display: grid;
+  gap: 20px;
+}
+
+.form-section {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #edf1f6;
+  box-shadow: 0 8px 24px rgba(8, 38, 74, 0.06);
+  padding: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-left: 12px;
+  border-left: 4px solid #08264a;
+}
+
+.section-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #eef2f6;
+  color: #08264a;
+  display: grid;
+  place-items: center;
+}
+
+.section-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.section-title h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #0b1f3a;
+}
+
+.field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
 }
+
 label {
   display: grid;
   gap: 8px;
-  font-size: 12px;
-  text-transform: uppercase;
-  color: #3f4957;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6f7d8f;
 }
-input, select, textarea {
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+input,
+select,
+textarea {
   width: 100%;
   border: 1px solid transparent;
-  background: #dfe4e9;
-  border-radius: 8px;
-  padding: 12px 14px;
+  background: #e8ecf1;
+  border-radius: 10px;
+  padding: 13px 14px;
   color: #1d2632;
   outline: none;
   font: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
 }
-input:focus, select:focus, textarea:focus {
+
+input:focus,
+select:focus,
+textarea:focus {
   border-color: #9bbcff;
   background: #eef4ff;
 }
+
 textarea {
-  min-height: 96px;
+  min-height: 110px;
   resize: vertical;
 }
-.primary {
-  background: #08264a;
-  color: white;
-  border: 0;
-  border-radius: 8px;
-  padding: 12px 18px;
+
+label small {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 500;
+  color: #8a96a3;
+  line-height: 1.45;
+}
+
+.money-input {
+  display: flex;
+  align-items: center;
+  background: #e8ecf1;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.money-input span {
+  padding: 0 12px;
+  color: #6f7d8f;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.03em;
+}
+
+.money-input input {
+  border-radius: 0;
+  background: transparent;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.cancel-btn,
+.save-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-weight: 700;
   cursor: pointer;
 }
-.primary:disabled {
-  opacity: 0.6;
+
+.cancel-btn {
+  background: #e8ecf1;
+  color: #26394e;
+}
+
+.save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #08264a;
+  color: #ffffff;
+}
+
+.save-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.save-btn:disabled {
+  opacity: 0.7;
   cursor: not-allowed;
 }
+
 .error {
   color: #8f1521;
-  background: #f9d9dc;
-  padding: 12px;
-  border-radius: 8px;
+  background: #fef2f2;
+  padding: 12px 14px;
+  border-radius: 10px;
 }
+
 @media (max-width: 760px) {
-  .two-cols {
+  .field-grid {
     grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>
