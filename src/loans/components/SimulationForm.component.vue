@@ -725,13 +725,14 @@ onMounted(() => {
 }
 .layout-quote {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
   gap: 28px;
   align-items: start;
 }
 .left-stack {
   display: grid;
-  gap: 0;
+  gap: 22px;
+  min-width: 0;
 }
 .card {
   background: #ffffff;
@@ -739,7 +740,7 @@ onMounted(() => {
   padding: 24px;
   box-shadow: 0 12px 30px rgba(8, 38, 74, 0.08);
   border: 1px solid #edf1f6;
-  margin-bottom: 22px;
+  min-width: 0;
 }
 .card h2 {
   font-size: 20px;
@@ -749,8 +750,10 @@ onMounted(() => {
   background: #08264a;
   color: white;
   align-self: start;
+  justify-self: end;
   position: sticky;
   top: 24px;
+  width: 100%;
 }
 .dark-card p, .dark-card span {
   color: #b9c9dd;
@@ -859,6 +862,7 @@ input:focus, select:focus {
 .summary-panel {
   display: grid;
   gap: 18px;
+  min-width: 0;
 }
 .summary-metric strong {
   font-size: 34px;
@@ -873,7 +877,12 @@ input:focus, select:focus {
 }
 .mini-table table {
   width: 100%;
+  min-width: 760px;
   border-collapse: collapse;
+}
+.mini-table {
+  max-width: 100%;
+  overflow-x: auto;
 }
 .mini-table th, .mini-table td {
   padding: 12px 10px;
@@ -882,12 +891,16 @@ input:focus, select:focus {
   vertical-align: top;
   font-size: 13px;
 }
+.mini-table td {
+  word-break: break-word;
+}
 .mini-table th {
   background: #e7ebf0;
   color: #455466;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 .dialog {
   border: 0;
@@ -930,6 +943,7 @@ input:focus, select:focus {
   }
   .dark-card {
     position: static;
+    justify-self: stretch;
   }
 }
 @media (max-width: 760px) {
