@@ -44,6 +44,11 @@ class LoanService {
         return await http.get('/api/v1/operations/summary')
     }
 
+    async getCurrentExchangeRate(base = 'USD', quote = 'PEN') {
+        const params = new URLSearchParams({ base, quote })
+        return await http.get(`/api/v1/reference/exchange-rate/current?${params.toString()}`)
+    }
+
     unwrapPage(data) {
         if (Array.isArray(data)) return data
         if (Array.isArray(data?.content)) return data.content

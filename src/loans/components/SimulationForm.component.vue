@@ -4,7 +4,7 @@
       <div class="left-stack">
         <!-- Entity Selection -->
         <section class="card">
-          <h2>Entity Selection</h2>
+          <h2><span class="section-icon">01</span>Entity Selection</h2>
           <div class="two-cols">
             <label>Primary Client
               <select v-model="selectedClientId" required>
@@ -25,13 +25,20 @@
 
         <!-- Loan Structure -->
         <section class="card">
-          <h2>Loan Structure</h2>
+          <h2><span class="section-icon">02</span>Loan Structure</h2>
           <div class="two-cols">
             <label>Operation Currency
-              <select v-model="loan.operationCurrency">
-                <option>USD</option>
-                <option>PEN</option>
-              </select>
+              <div class="segmented-control">
+                <button
+                  v-for="currency in ['USD', 'PEN']"
+                  :key="currency"
+                  type="button"
+                  :class="{ active: loan.operationCurrency === currency }"
+                  @click="loan.operationCurrency = currency"
+                >
+                  {{ currency }}
+                </button>
+              </div>
             </label>
             <label>Vehicle Price
               <input type="number" step="0.01" v-model.number="vehiclePrice" />
@@ -60,7 +67,7 @@
 
         <!-- Interest Configuration -->
         <section class="card">
-          <h2>Interest Configuration</h2>
+          <h2><span class="section-icon">03</span>Interest Configuration</h2>
           <div class="two-cols">
             <label>Rate Type
               <select v-model="rate.rateType">
@@ -215,22 +222,58 @@
         </section>
       </div>
 
-      <aside class="summary-panel card dark-card">
-        <h2>Simulation Summary</h2>
-        <div class="summary-metric">
-          <span>Estimated Monthly Installment</span>
-          <strong>$------</strong>
-        </div>
-        <div class="summary-row">
-          <span>Total Interest</span>
-          <strong>$------</strong>
-        </div>
-        <div class="summary-row">
-          <span>TCEA</span>
-          <strong>------</strong>
-        </div>
-        <button class="primary light full" type="submit">Calculate Quote</button>
-        <button class="danger full" type="button" @click="resetForm">Reset Simulation</button>
+      <aside class="right-rail">
+        <section class="summary-panel card dark-card">
+          <h2>Simulation Summary</h2>
+          <div class="summary-metric">
+            <span>Estimated Monthly Installment</span>
+            <strong>{{ summaryMonthlyInstallment }}</strong>
+          </div>
+          <div class="summary-grid">
+            <div>
+              <span>Total Interest</span>
+              <strong>{{ summaryTotalInterest }}</strong>
+            </div>
+            <div>
+              <span>TCEA</span>
+              <strong>{{ summaryTcea }}</strong>
+            </div>
+          </div>
+          <button class="primary light full" type="submit" :disabled="calculating">
+            {{ calculating ? 'Calculating...' : 'Calculate' }}
+          </button>
+          <button
+            class="primary save full"
+            type="button"
+            :disabled="!calculation || saving"
+            @click="$emit('save')"
+          >
+            {{ saving ? 'Saving...' : savedOperation ? 'Saved Operation' : 'Save Operation' }}
+          </button>
+          <button class="danger full" type="button" @click="handleReset">Reset Simulation</button>
+        </section>
+
+        <section class="side-card exchange-card">
+          <div class="side-title">
+            <span>Live Exchange</span>
+            <strong>Live</strong>
+          </div>
+          <div class="exchange-row">
+            <span>USD</span>
+            <small>to</small>
+            <span>PEN</span>
+            <strong>{{ exchangeRate.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) }}</strong>
+          </div>
+          <button class="exchange-refresh" type="button" :disabled="loadingExchange" @click="loadCurrentExchangeRate">
+            {{ loadingExchange ? 'Refreshing...' : 'Refresh rate' }}
+          </button>
+          <p>Manual value used for cross-currency quote calculations.</p>
+        </section>
+
+        <section class="side-card advisor-tip">
+          <strong>Advisor Tip</strong>
+          <p>Complete the loan inputs and calculate the quote to receive financial indicators.</p>
+        </section>
       </aside>
     </div>
 
@@ -360,14 +403,20 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { loanService } from '../services/loan.service.js'
 import { toastService } from '../../shared/services/toast.service.js'
 
 const props = defineProps({
   clients: { type: Array, default: () => [] },
-  vehicles: { type: Array, default: () => [] }
+  vehicles: { type: Array, default: () => [] },
+  calculation: { type: Object, default: null },
+  lastRequest: { type: Object, default: null },
+  calculating: { type: Boolean, default: false },
+  saving: { type: Boolean, default: false },
+  savedOperation: { type: Object, default: null }
 })
 
-const emit = defineEmits(['calculate'])
+const emit = defineEmits(['calculate', 'save', 'clear-result'])
 
 const router = useRouter()
 
@@ -418,6 +467,7 @@ const exchangeRate = reactive({
   mode: 'MANUAL',
   value: 3.75
 })
+const loadingExchange = ref(false)
 
 // ===== Charges =====
 const initialCharges = ref([
@@ -465,6 +515,24 @@ const editingPeriodicCharge = reactive({
 // ===== Computed =====
 const selectedVehicle = computed(() => {
   return props.vehicles.find(v => String(v.identifier) === String(selectedVehicleId.value))
+})
+
+const quoteSummary = computed(() => props.calculation?.summary || props.calculation?.calculation?.summary || {})
+const quoteIndicators = computed(() => props.calculation?.indicators || props.calculation?.calculation?.indicators || {})
+const summaryCurrency = computed(() => props.lastRequest?.loan?.operationCurrency || loan.operationCurrency || 'USD')
+const summaryMonthlyInstallment = computed(() => {
+  const value = quoteSummary.value.baseInstallment
+  return value === undefined || value === null ? '$------' : formatMoney(value, summaryCurrency.value)
+})
+const summaryTotalInterest = computed(() => {
+  const value = quoteSummary.value.totalInterest
+  return value === undefined || value === null ? '$------' : formatMoney(value, summaryCurrency.value)
+})
+const summaryTcea = computed(() => {
+  const value = quoteIndicators.value.effectiveAnnualCost
+  if (value === undefined || value === null) return '------'
+  const numeric = Number(value)
+  return formatPercent(Math.abs(numeric) < 1 ? numeric * 100 : numeric)
 })
 
 // ===== Methods =====
@@ -570,6 +638,24 @@ function removePeriodicCharge(index) {
 
 function closePeriodicDialog() {
   periodicChargeDialog.value?.close()
+}
+
+function handleReset() {
+  resetForm()
+  emit('clear-result')
+}
+
+async function loadCurrentExchangeRate() {
+  loadingExchange.value = true
+  try {
+    const current = await loanService.getCurrentExchangeRate('USD', 'PEN')
+    exchangeRate.value = Number(current?.rate || exchangeRate.value)
+    toastService.success('Exchange rate updated')
+  } catch (err) {
+    toastService.error(err.message)
+  } finally {
+    loadingExchange.value = false
+  }
 }
 
 // ===== Build Request =====
@@ -697,19 +783,36 @@ watch(selectedVehicleId, (newVal) => {
   }
 })
 
-// ===== Lifecycle =====
-onMounted(() => {
+function syncInitialSelections() {
   if (props.clients.length > 0) {
-    selectedClientId.value = props.clients[0]?.identifier || ''
+    const hasClient = props.clients.some(c => String(c.identifier) === String(selectedClientId.value))
+    if (!selectedClientId.value || !hasClient) {
+      selectedClientId.value = props.clients[0]?.identifier || ''
+    }
   }
+
   if (props.vehicles.length > 0) {
-    selectedVehicleId.value = props.vehicles[0]?.identifier || ''
-    const vehicle = props.vehicles[0]
+    const hasVehicle = props.vehicles.some(v => String(v.identifier) === String(selectedVehicleId.value))
+    if (!selectedVehicleId.value || !hasVehicle) {
+      selectedVehicleId.value = props.vehicles[0]?.identifier || ''
+    }
+    const vehicle = props.vehicles.find(v => String(v.identifier) === String(selectedVehicleId.value))
     if (vehicle) {
       vehiclePrice.value = vehicle.price
       loan.operationCurrency = vehicle.currency
     }
   }
+}
+
+watch(
+  () => [props.clients.length, props.vehicles.length],
+  syncInitialSelections,
+  { immediate: true }
+)
+
+// ===== Lifecycle =====
+onMounted(() => {
+  syncInitialSelections()
 
   // Check for selected vehicle from Vehicles page
   if (window.selectedVehicleId) {
@@ -725,34 +828,46 @@ onMounted(() => {
 }
 .layout-quote {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
-  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
+  gap: 24px;
   align-items: start;
+  max-width: 1040px;
 }
 .left-stack {
   display: grid;
-  gap: 22px;
+  gap: 20px;
   min-width: 0;
 }
 .card {
   background: #ffffff;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 12px 30px rgba(8, 38, 74, 0.08);
+  border-radius: 8px;
+  padding: 22px;
+  box-shadow: 0 10px 24px rgba(8, 38, 74, 0.06);
   border: 1px solid #edf1f6;
   min-width: 0;
 }
 .card h2 {
-  font-size: 20px;
-  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  margin: 0 0 18px;
+  color: #08264a;
+}
+.section-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: #eaf1fb;
+  color: #315f95;
+  font-size: 10px;
+  font-weight: 800;
 }
 .dark-card {
   background: #08264a;
   color: white;
-  align-self: start;
-  justify-self: end;
-  position: sticky;
-  top: 24px;
   width: 100%;
 }
 .dark-card p, .dark-card span {
@@ -764,12 +879,12 @@ onMounted(() => {
 .two-cols {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  gap: 16px;
 }
 .two-card-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  gap: 20px;
 }
 .section-head {
   display: flex;
@@ -783,12 +898,12 @@ onMounted(() => {
 }
 label {
   display: grid;
-  gap: 8px;
-  font-size: 12px;
+  gap: 7px;
+  font-size: 10px;
   text-transform: uppercase;
   color: #3f4957;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
 }
 .dark-card label {
   color: #b9c9dd;
@@ -797,11 +912,12 @@ input, select {
   width: 100%;
   border: 1px solid transparent;
   background: #dfe4e9;
-  border-radius: 8px;
-  padding: 12px 14px;
+  border-radius: 5px;
+  padding: 11px 12px;
   color: #1d2632;
   outline: none;
   font: inherit;
+  min-height: 42px;
 }
 input:focus, select:focus {
   border-color: #9bbcff;
@@ -813,6 +929,27 @@ input:focus, select:focus {
 }
 .dark-card input:focus, .dark-card select:focus {
   background: rgba(255,255,255,0.2);
+}
+.segmented-control {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  background: #dfe4e9;
+  border-radius: 5px;
+  padding: 3px;
+  min-height: 42px;
+}
+.segmented-control button {
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #506070;
+  font-weight: 800;
+  cursor: pointer;
+}
+.segmented-control button.active {
+  background: #ffffff;
+  color: #08264a;
+  box-shadow: 0 1px 4px rgba(8, 38, 74, 0.12);
 }
 .hint {
   font-size: 13px;
@@ -832,6 +969,16 @@ input:focus, select:focus {
 .primary.light {
   background: white;
   color: #08264a;
+}
+.primary.save {
+  background: #e8f0fb;
+  color: #08264a;
+}
+.primary:disabled,
+.secondary:disabled,
+.danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 .secondary {
   background: #e2e7ed;
@@ -861,19 +1008,113 @@ input:focus, select:focus {
 }
 .summary-panel {
   display: grid;
-  gap: 18px;
+  gap: 16px;
   min-width: 0;
 }
 .summary-metric strong {
-  font-size: 34px;
+  font-size: 32px;
   display: block;
   margin-top: 8px;
 }
-.summary-row {
-  display: flex;
-  justify-content: space-between;
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
   border-top: 1px solid rgba(255,255,255,0.18);
-  padding-top: 12px;
+  padding-top: 14px;
+}
+.summary-grid div {
+  display: grid;
+  gap: 6px;
+}
+.summary-grid strong {
+  color: #ffffff;
+  font-size: 13px;
+}
+.right-rail {
+  display: grid;
+  gap: 14px;
+  position: sticky;
+  top: 24px;
+}
+.side-card {
+  background: #ffffff;
+  border: 1px solid #edf1f6;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 8px 20px rgba(8, 38, 74, 0.05);
+}
+.side-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #3f4957;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.side-title strong {
+  background: #ffe3e5;
+  border-radius: 999px;
+  color: #a0182b;
+  padding: 3px 7px;
+  font-size: 9px;
+}
+.exchange-row {
+  display: grid;
+  grid-template-columns: auto auto auto 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.exchange-row span {
+  background: #eef3f8;
+  border-radius: 999px;
+  color: #08264a;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 8px;
+}
+.exchange-row small {
+  color: #6f7d8f;
+  font-weight: 800;
+  text-align: center;
+}
+.exchange-row strong {
+  color: #08264a;
+  font-size: 20px;
+  text-align: right;
+}
+.exchange-refresh {
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  background: #e8f0fb;
+  color: #08264a;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: 12px;
+  padding: 9px 12px;
+}
+.exchange-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.side-card p {
+  color: #6f7d8f;
+  font-size: 12px;
+  line-height: 1.45;
+  margin: 10px 0 0;
+}
+.advisor-tip {
+  border-left: 3px solid #315f95;
+  background: #edf5ff;
+}
+.advisor-tip strong {
+  color: #315f95;
+  font-size: 12px;
 }
 .mini-table table {
   width: 100%;
@@ -941,9 +1182,8 @@ input:focus, select:focus {
   .layout-quote {
     grid-template-columns: 1fr;
   }
-  .dark-card {
+  .right-rail {
     position: static;
-    justify-self: stretch;
   }
 }
 @media (max-width: 760px) {
