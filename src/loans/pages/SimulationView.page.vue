@@ -1,48 +1,46 @@
 <template>
-  <div class="simulation-page">
-    <SimulationForm
-        :clients="clients"
-        :vehicles="vehicles"
-        :calculation="calculation"
-        :last-request="lastRequest"
-        :calculating="calculating"
-        :saving="saving"
-        :saved-operation="savedOperation"
-        @calculate="onCalculate"
-        @save="onSave"
-        @clear-result="clearResult"
-    />
-
-    <CalculationResults
-        v-if="calculation"
-        :calculation="calculation"
-        :request="lastRequest"
-        :raw-data="calculation"
-        @recalculate="scrollToForm"
-        @save="onSave"
-        @share="goToSavedOperation"
-    />
-  </div>
+  <SimulationForm
+    :clients="clients"
+    :vehicles="vehicles"
+    :calculation="restoredCalculation"
+    :last-request="restoredRequest"
+    :calculating="calculating"
+    :saving="saving"
+    :saved-operation="savedOperation"
+    :initial-request="resumeRequest"
+    @calculate="onCalculate"
+    @save="onSave"
+    @clear-result="clearResult"
+  />
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import SimulationForm from '../components/SimulationForm.component.vue'
-import CalculationResults from '../components/CalculationResults.component.vue'
 import { clientService } from '../../clients/services/client.service.js'
 import { vehicleService } from '../../vehicles/services/vehicle.service.js'
 import { loanService } from '../services/loan.service.js'
 import { toastService } from '../../shared/services/toast.service.js'
+import {
+  clearSimulationSession,
+  loadSimulationRequest,
+  loadSimulationResult,
+  saveSimulationRequest,
+  saveSimulationResult
+} from '../utils/simulation-session.util.js'
 
 const clients = ref([])
 const vehicles = ref([])
 const router = useRouter()
-const calculation = ref(null)
-const lastRequest = ref(null)
+const route = useRoute()
 const savedOperation = ref(null)
 const calculating = ref(false)
 const saving = ref(false)
+
+const restoredRequest = computed(() => loadSimulationRequest())
+const restoredCalculation = computed(() => loadSimulationResult())
+const resumeRequest = computed(() => route.query.resume === '1' ? restoredRequest.value : null)
 
 async function loadBootstrapData() {
   try {
@@ -53,7 +51,6 @@ async function loadBootstrapData() {
     clients.value = clientsData
     vehicles.value = vehiclesData
 
-    // Check if a vehicle was selected from the Vehicles page
     if (window.selectedVehicleId) {
       window.selectedVehicleId = null
     }
@@ -66,9 +63,11 @@ async function onCalculate(request) {
   calculating.value = true
   savedOperation.value = null
   try {
-    lastRequest.value = request
-    calculation.value = await loanService.calculateQuote(request)
+    const calculation = await loanService.calculateQuote(request)
+    saveSimulationRequest(request)
+    saveSimulationResult(calculation)
     toastService.success('Quote calculated successfully')
+    router.push({ name: 'simulation-result' })
   } catch (err) {
     toastService.error(err.message)
   } finally {
@@ -77,13 +76,14 @@ async function onCalculate(request) {
 }
 
 async function onSave() {
-  if (!lastRequest.value) {
+  const request = loadSimulationRequest()
+  if (!request) {
     toastService.warning('Calculate a quote before saving')
     return
   }
   saving.value = true
   try {
-    savedOperation.value = await loanService.saveOperation(lastRequest.value)
+    savedOperation.value = await loanService.saveOperation(request)
     toastService.success('Operation saved successfully')
   } catch (err) {
     toastService.error(err.message)
@@ -93,29 +93,12 @@ async function onSave() {
 }
 
 function clearResult() {
-  calculation.value = null
-  lastRequest.value = null
   savedOperation.value = null
-}
-
-function scrollToForm() {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
-function goToSavedOperation() {
-  if (savedOperation.value?.identifier) {
-    router.push(`/operation/${savedOperation.value.identifier}`)
-  } else {
-    toastService.warning('Save the operation before sharing')
+  clearSimulationSession()
+  if (route.query.resume) {
+    router.replace({ name: 'simulation' })
   }
 }
 
 onMounted(loadBootstrapData)
 </script>
-
-<style scoped>
-.simulation-page {
-  display: grid;
-  gap: 24px;
-}
-</style>

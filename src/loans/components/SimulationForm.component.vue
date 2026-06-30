@@ -402,7 +402,6 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { loanService } from '../services/loan.service.js'
 import { toastService } from '../../shared/services/toast.service.js'
 
@@ -413,17 +412,17 @@ const props = defineProps({
   lastRequest: { type: Object, default: null },
   calculating: { type: Boolean, default: false },
   saving: { type: Boolean, default: false },
-  savedOperation: { type: Object, default: null }
+  savedOperation: { type: Object, default: null },
+  initialRequest: { type: Object, default: null }
 })
 
 const emit = defineEmits(['calculate', 'save', 'clear-result'])
-
-const router = useRouter()
 
 // ===== Form State =====
 const selectedClientId = ref('')
 const selectedVehicleId = ref('')
 const vehiclePrice = ref(15000)
+const hydratingRequest = ref(false)
 
 const loan = reactive({
   operationCurrency: 'USD',
@@ -540,6 +539,10 @@ function updateDueInstallment() {
   balloon.dueInstallment = loan.termMonths
 }
 
+function roundCurrency(value) {
+  return Math.round(Number(value || 0) * 100) / 100
+}
+
 function formatMoney(value, currency = 'USD') {
   const n = Number(value ?? 0)
   return `${currency} ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -556,6 +559,92 @@ function getSelectedClient() {
 
 function getSelectedVehicle() {
   return props.vehicles.find(v => String(v.identifier) === String(selectedVehicleId.value))
+}
+
+function convertAmount(value, fromCurrency, toCurrency) {
+  const amount = Number(value ?? 0)
+  if (!amount) return 0
+  if (fromCurrency === toCurrency) return roundCurrency(amount)
+
+  const rateValue = Number(exchangeRate.value || 0)
+  if (!rateValue) return roundCurrency(amount)
+
+  if (fromCurrency === 'USD' && toCurrency === 'PEN') {
+    return roundCurrency(amount * rateValue)
+  }
+
+  if (fromCurrency === 'PEN' && toCurrency === 'USD') {
+    return roundCurrency(amount / rateValue)
+  }
+
+  return roundCurrency(amount)
+}
+
+function syncVehiclePriceFromSelection() {
+  const vehicle = getSelectedVehicle()
+  if (!vehicle) return
+
+  const baseCurrency = vehicle.currency || 'USD'
+  const targetCurrency = loan.operationCurrency || baseCurrency
+  vehiclePrice.value = convertAmount(vehicle.price, baseCurrency, targetCurrency)
+}
+
+function applyRequestToForm(request) {
+  if (!request) return
+
+  hydratingRequest.value = true
+
+  selectedClientId.value = request.client?.clientId || selectedClientId.value
+  selectedVehicleId.value = request.vehicle?.vehicleId || selectedVehicleId.value
+
+  loan.operationCurrency = request.loan?.operationCurrency || 'USD'
+  loan.termMonths = Number(request.loan?.termMonths || 48)
+  loan.startDate = request.loan?.startDate || new Date().toISOString().split('T')[0]
+
+  downPaymentMode.value = request.loan?.downPaymentAmount !== null && request.loan?.downPaymentAmount !== undefined
+    ? 'amount'
+    : 'percent'
+  downPaymentAmount.value = Number(request.loan?.downPaymentAmount || 0)
+  downPaymentPercent.value = Number(request.loan?.downPaymentPercent || 0)
+
+  vehiclePrice.value = Number(request.vehicle?.vehiclePrice || vehiclePrice.value)
+
+  rate.rateType = request.rate?.rateType || 'EFFECTIVE'
+  rate.ratePeriod = request.rate?.ratePeriod || 'ANNUAL'
+  rate.rateValue = Number(request.rate?.rateValue || 0)
+  rate.capitalizationFrequency = request.rate?.capitalizationFrequency || 'MONTHLY'
+
+  grace.graceType = request.grace?.graceType || 'NONE'
+  grace.gracePeriods = Number(request.grace?.gracePeriods || 0)
+
+  balloon.enabled = !!request.balloon?.enabled
+  balloon.balloonPercent = request.balloon?.balloonPercent !== null && request.balloon?.balloonPercent !== undefined
+    ? Number(request.balloon.balloonPercent)
+    : 40
+  balloon.balloonAmount = request.balloon?.balloonAmount !== null && request.balloon?.balloonAmount !== undefined
+    ? Number(request.balloon.balloonAmount)
+    : null
+  balloon.balloonBase = request.balloon?.balloonBase || 'VEHICLE_PRICE'
+  balloon.dueInstallment = Number(request.balloon?.dueInstallment || loan.termMonths)
+  balloonMode.value = request.balloon?.balloonAmount !== null && request.balloon?.balloonAmount !== undefined
+    ? 'amount'
+    : 'percent'
+
+  financialEvaluation.discountRateType = request.financialEvaluation?.discountRateType || 'EFFECTIVE'
+  financialEvaluation.discountRatePeriod = request.financialEvaluation?.discountRatePeriod || 'ANNUAL'
+  financialEvaluation.discountRateValue = Number(request.financialEvaluation?.discountRateValue || 0)
+
+  exchangeRate.mode = request.exchangeRate?.mode || 'MANUAL'
+  exchangeRate.value = Number(request.exchangeRate?.value || exchangeRate.value)
+
+  initialCharges.value = Array.isArray(request.additionalCharges?.initialCharges)
+    ? request.additionalCharges.initialCharges.map(charge => ({ ...charge }))
+    : []
+  periodicCharges.value = Array.isArray(request.additionalCharges?.periodicCharges)
+    ? request.additionalCharges.periodicCharges.map(charge => ({ ...charge }))
+    : []
+
+  hydratingRequest.value = false
 }
 
 // ===== Charge Management =====
@@ -645,12 +734,14 @@ function handleReset() {
   emit('clear-result')
 }
 
-async function loadCurrentExchangeRate() {
+async function loadCurrentExchangeRate(showToast = true) {
   loadingExchange.value = true
   try {
     const current = await loanService.getCurrentExchangeRate('USD', 'PEN')
     exchangeRate.value = Number(current?.rate || exchangeRate.value)
-    toastService.success('Exchange rate updated')
+    if (showToast) {
+      toastService.success('Exchange rate updated')
+    }
   } catch (err) {
     toastService.error(err.message)
   } finally {
@@ -681,7 +772,7 @@ function buildQuoteRequest() {
       year: Number(vehicle.year),
       vehicleType: vehicle.vehicleType || 'OTHER',
       vehiclePrice: Number(vehiclePrice.value || vehicle.price),
-      currency: vehicle.currency || loan.operationCurrency
+      currency: loan.operationCurrency
     },
     loan: {
       operationCurrency: loan.operationCurrency,
@@ -772,16 +863,33 @@ function resetForm() {
     { code: 'LIFE_INSURANCE', label: 'Seguro de desgravamen', chargeType: 'RATE', amount: null, currency: null, ratePercent: 0.05, rateBase: 'OPENING_BALANCE', frequency: 'MONTHLY', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
     { code: 'VEHICLE_INSURANCE', label: 'Seguro vehicular todo riesgo', chargeType: 'RATE', amount: null, currency: null, ratePercent: 4.50, rateBase: 'VEHICLE_PRICE', frequency: 'ANNUAL_PRORATED_MONTHLY', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 }
   ]
+  syncVehiclePriceFromSelection()
 }
 
 // ===== Watch for vehicle selection =====
-watch(selectedVehicleId, (newVal) => {
-  const vehicle = props.vehicles.find(v => String(v.identifier) === String(newVal))
-  if (vehicle) {
-    vehiclePrice.value = vehicle.price
-    loan.operationCurrency = vehicle.currency
+watch(selectedVehicleId, () => {
+  if (!hydratingRequest.value) {
+    syncVehiclePriceFromSelection()
   }
 })
+
+watch(
+  () => loan.operationCurrency,
+  () => {
+    if (!hydratingRequest.value) {
+      syncVehiclePriceFromSelection()
+    }
+  }
+)
+
+watch(
+  () => exchangeRate.value,
+  () => {
+    if (!hydratingRequest.value && loan.operationCurrency === 'PEN') {
+      syncVehiclePriceFromSelection()
+    }
+  }
+)
 
 function syncInitialSelections() {
   if (props.clients.length > 0) {
@@ -796,23 +904,37 @@ function syncInitialSelections() {
     if (!selectedVehicleId.value || !hasVehicle) {
       selectedVehicleId.value = props.vehicles[0]?.identifier || ''
     }
-    const vehicle = props.vehicles.find(v => String(v.identifier) === String(selectedVehicleId.value))
-    if (vehicle) {
-      vehiclePrice.value = vehicle.price
-      loan.operationCurrency = vehicle.currency
+    if (!props.initialRequest) {
+      syncVehiclePriceFromSelection()
     }
   }
 }
 
 watch(
   () => [props.clients.length, props.vehicles.length],
-  syncInitialSelections,
+  () => {
+    syncInitialSelections()
+    if (props.initialRequest && props.clients.length > 0 && props.vehicles.length > 0) {
+      applyRequestToForm(props.initialRequest)
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.initialRequest,
+  (request) => {
+    if (request && props.clients.length > 0 && props.vehicles.length > 0) {
+      applyRequestToForm(request)
+    }
+  },
   { immediate: true }
 )
 
 // ===== Lifecycle =====
 onMounted(() => {
   syncInitialSelections()
+  loadCurrentExchangeRate(false)
 
   // Check for selected vehicle from Vehicles page
   if (window.selectedVehicleId) {

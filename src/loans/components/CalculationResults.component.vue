@@ -6,7 +6,7 @@
         <p id="resultSubtitle">{{ subtitle }}</p>
       </div>
       <div class="button-row">
-        <button class="secondary" @click="$emit('recalculate')">Recalculate</button>
+        <button class="secondary" @click="$emit('back')">Back to Form</button>
         <button class="primary" @click="$emit('save')">Save Operation</button>
         <button class="secondary" @click="$emit('share')">Share Saved Operation</button>
       </div>
@@ -98,10 +98,6 @@
       </div>
     </section>
 
-    <section class="card">
-      <h2>Raw Response</h2>
-      <pre class="debug">{{ JSON.stringify(rawData, null, 2) }}</pre>
-    </section>
   </div>
 </template>
 
@@ -110,11 +106,10 @@ import { computed } from 'vue'
 
 const props = defineProps({
   calculation: { type: Object, default: null },
-  request: { type: Object, default: null },
-  rawData: { type: Object, default: null }
+  request: { type: Object, default: null }
 })
 
-defineEmits(['recalculate', 'save', 'share'])
+defineEmits(['back', 'save', 'share'])
 
 const calc = computed(() => props.calculation?.calculation || props.calculation || {})
 const summary = computed(() => calc.value?.summary || props.calculation?.summary || {})
@@ -289,17 +284,6 @@ function effectOfFinancing(mode) {
 }
 .danger-text {
   color: #8f1521;
-}
-.debug {
-  background: #101a2a;
-  color: #d7e5ff;
-  border-radius: 10px;
-  padding: 16px;
-  max-height: 420px;
-  overflow: auto;
-  font-size: 12px;
-  white-space: pre-wrap;
-  word-break: break-word;
 }
 .hint {
   font-size: 13px;
