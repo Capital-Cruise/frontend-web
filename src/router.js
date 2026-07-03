@@ -8,6 +8,7 @@ import SimulationResultView from './loans/pages/SimulationResultView.page.vue'
 import OperationsView from './loans/pages/OperationsView.page.vue'
 import OperationDetailView from './loans/pages/OperationDetailView.page.vue'
 import PageNotFound from './public/pages/PageNotFound.page.vue'
+import SupportView from './public/pages/SupportView.page.vue'
 
 const routes = [
     {
@@ -27,7 +28,8 @@ const routes = [
             { path: 'simulation', name: 'simulation', component: SimulationView, meta: { title: 'New Simulation', subtitle: 'Create a new loan operation.' } },
             { path: 'simulation/result', name: 'simulation-result', component: SimulationResultView, meta: { title: 'Simulation Result', subtitle: 'Review the generated loan quote.' } },
             { path: 'operations', name: 'operations', component: OperationsView, meta: { title: 'Saved Operations', subtitle: 'Review saved financial simulations.' } },
-            { path: 'operation/:id', name: 'operation-detail', component: OperationDetailView, props: true }
+            { path: 'operation/:id', name: 'operation-detail', component: OperationDetailView, props: true },
+            { path: 'support', name: 'support', component: SupportView, meta: { title: 'Support', subtitle: 'FAQ, contacto y términos de uso.' } }
         ]
     },
     { path: '/:pathMatch(.*)*', name: 'not-found', component: PageNotFound }

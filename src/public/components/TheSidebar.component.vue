@@ -30,7 +30,8 @@ const navItems = [
   { path: '/clients', label: 'Clients' },
   { path: '/vehicles', label: 'Vehicles' },
   { path: '/simulation', label: 'New Simulation' },
-  { path: '/operations', label: 'Saved Operations' }
+  { path: '/operations', label: 'Saved Operations' },
+  { path: '/support', label: 'Support' }
 ]
 </script>
 
