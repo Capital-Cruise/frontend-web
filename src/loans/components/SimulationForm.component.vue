@@ -1,8 +1,8 @@
 <template>
   <form class="simulation-form" @submit.prevent="handleCalculate">
     <div class="layout-quote">
-      <div class="left-stack">        <!-- Selecci?n de cliente y veh?culo -->
-        <section class="card">          <h2><span class="section-icon">01</span>Selecci?n de cliente y veh?culo</h2>
+      <div class="left-stack">        <!-- Selección de cliente y vehículo -->
+        <section class="card">          <h2><span class="section-icon">01</span>Selección de cliente y vehículo</h2>
           <div class="two-cols">
             <label>Cliente
               <select v-model="selectedClientId" required>
@@ -10,16 +10,16 @@
                   {{ c.displayName }}
                 </option>
               </select>
-            </label>            <label>Veh?culo
+            </label>            <label>Vehículo
               <select v-model="selectedVehicleId" required>
-                <option v-for="v in vehicles" :key="v.identifier" :value="v.identifier">                  {{ v.displayName }} ? {{ formatMoney(v.price, v.currency) }}
+                <option v-for="v in vehicles" :key="v.identifier" :value="v.identifier">                  {{ v.displayName }} · {{ formatMoney(v.price, v.currency) }}
                 </option>
               </select>
             </label>
           </div>
-        </section>        <!-- Estructura del cr?dito -->
-        <section class="card">          <h2><span class="section-icon">02</span>Estructura del cr?dito</h2>
-          <div class="two-cols">            <label>Moneda de la operaci?n
+        </section>        <!-- Estructura del crédito -->
+        <section class="card">          <h2><span class="section-icon">02</span>Estructura del crédito</h2>
+          <div class="two-cols">            <label>Moneda de la operación
               <div class="segmented-control">
                 <button
                   v-for="currency in ['USD', 'PEN']"
@@ -31,7 +31,7 @@
                   {{ currency }}
                 </button>
               </div>
-            </label>            <label>Precio del veh?culo
+            </label>            <label>Precio del vehículo
               <input type="number" step="0.01" v-model.number="vehiclePrice" />
             </label>
             <label>Modo de cuota inicial
@@ -52,9 +52,9 @@
             <label>Fecha de inicio
               <input type="date" v-model="loan.startDate" />
             </label>
-          </div>          <p class="hint">Valores predeterminados del backend: m?todo franc?s vencido ordinario, periodicidad mensual, gracia ordinaria y base comercial 30/360.</p>
-        </section>        <!-- Configuraci?n de tasa -->
-        <section class="card">          <h2><span class="section-icon">03</span>Configuraci?n de tasa</h2>
+          </div>          <p class="hint">Valores predeterminados del backend: método francés vencido ordinario, periodicidad mensual, gracia ordinaria y base comercial 30/360.</p>
+        </section>        <!-- Configuración de tasa -->
+        <section class="card">          <h2><span class="section-icon">03</span>Configuración de tasa</h2>
           <div class="two-cols">
             <label>Tipo de tasa
               <select v-model="rate.rateType">
@@ -70,7 +70,7 @@
                 <option value="ANNUAL">Anual</option>
                 <option value="Mensual">Mensual</option>
               </select>
-            </label>            <label v-show="rate.rateType === 'NOMINAL'">Frecuencia de capitalizaci?n
+            </label>            <label v-show="rate.rateType === 'NOMINAL'">Frecuencia de capitalización
               <select v-model="rate.capitalizationFrequency">
                 <option value="Mensual">Mensual</option>
                 <option value="DAILY">Diaria</option>
@@ -123,7 +123,7 @@
                 <input type="number" step="0.01" v-model.number="balloon.balloonAmount" />
               </label>
               <label>Base de la cuota balloon
-                <select v-model="balloon.balloonBase">                  <option value="VEHICLE_PRICE">Precio del veh?culo</option>
+                <select v-model="balloon.balloonBase">                  <option value="VEHICLE_PRICE">Precio del vehículo</option>
                   <option value="PRINCIPAL_FINANCED">Principal financiado</option>
                 </select>
               </label>
@@ -140,7 +140,7 @@
                 <option value="PARTIAL">Gracia parcial</option>
                 <option value="TOTAL">Gracia total</option>
               </select>
-            </label>            <label v-show="grace.graceType !== 'NONE'">Duraci?n en meses
+            </label>            <label v-show="grace.graceType !== 'NONE'">Duración en meses
               <input type="number" min="0" v-model.number="grace.gracePeriods" />
             </label>
           </section>
@@ -154,7 +154,7 @@
           </div>
           <div class="mini-table">
             <table>
-              <thead>              <tr><th>C?digo</th><th>Nombre</th><th>Monto</th><th>Modo</th><th>Acciones</th></tr>
+              <thead>              <tr><th>Código</th><th>Nombre</th><th>Monto</th><th>Modo</th><th>Acciones</th></tr>
               </thead>
               <tbody>
               <tr v-for="(charge, index) in initialCharges" :key="index">
@@ -171,13 +171,13 @@
             </table>
             <p v-if="initialCharges.length === 0">No hay cargos iniciales agregados.</p>
           </div>
-        </section>        <!-- Cargos peri?dicos -->
+        </section>        <!-- Cargos periódicos -->
         <section class="card">
-          <div class="section-head">            <h2>Cargos peri?dicos</h2>            <button type="button" class="secondary" @click="addPeriodicCharge">Agregar cargo peri?dico</button>
+          <div class="section-head">            <h2>Cargos periódicos</h2>            <button type="button" class="secondary" @click="addPeriodicCharge">Agregar cargo periódico</button>
           </div>
           <div class="mini-table">
             <table>
-              <thead>              <tr><th>C?digo</th><th>Nombre</th><th>Tipo</th><th>Valor</th><th>Base</th><th>Frecuencia</th><th>Rango</th><th>Acciones</th></tr>
+              <thead>              <tr><th>Código</th><th>Nombre</th><th>Tipo</th><th>Valor</th><th>Base</th><th>Frecuencia</th><th>Rango</th><th>Acciones</th></tr>
               </thead>
               <tbody>
               <tr v-for="(charge, index) in periodicCharges" :key="index">
@@ -194,13 +194,13 @@
                 </td>
               </tr>
               </tbody>
-            </table>            <p v-if="periodicCharges.length === 0">No hay cargos peri?dicos agregados.</p>
+            </table>            <p v-if="periodicCharges.length === 0">No hay cargos periódicos agregados.</p>
           </div>
         </section>
       </div>
 
       <aside class="right-rail">
-        <section class="summary-panel card dark-card">          <h2>Resumen de la simulaci?n</h2>
+        <section class="summary-panel card dark-card">          <h2>Resumen de la simulación</h2>
           <div class="summary-metric">
             <span>Cuota mensual estimada</span>
             <strong>{{ summaryMonthlyInstallment }}</strong>
@@ -223,8 +223,8 @@
             type="button"
             :disabled="!calculation || saving"
             @click="$emit('save')"
-          >            {{ saving ? 'Guardando...' : savedOperation ? 'Operaci?n guardada' : 'Guardar operaci?n' }}
-          </button>          <button class="danger full" type="button" @click="handleReset">Reiniciar simulaci?n</button>
+          >            {{ saving ? 'Guardando...' : savedOperation ? 'Operación guardada' : 'Guardar operación' }}
+          </button>          <button class="danger full" type="button" @click="handleReset">Reiniciar simulación</button>
         </section>
 
         <section class="side-card exchange-card">
@@ -240,16 +240,16 @@
           </div>
           <button class="exchange-refresh" type="button" :disabled="loadingExchange" @click="loadCurrentExchangeRate">
             {{ loadingExchange ? 'Actualizando...' : 'Actualizar tipo de cambio' }}
-          </button>          <p>Valor manual usado para c?lculos de cotizaci?n entre monedas distintas.</p>
+          </button>          <p>Valor manual usado para cálculos de cotización entre monedas distintas.</p>
         </section>
 
-        <section class="side-card advisor-tip">          <strong>Recomendaci?n</strong>          <p>Completa los datos del cr?dito y calcula la cotizaci?n para obtener los indicadores financieros.</p>
+        <section class="side-card advisor-tip">          <strong>Recomendación</strong>          <p>Completa los datos del crédito y calcula la cotización para obtener los indicadores financieros.</p>
         </section>
       </aside>
-    </div>    <!-- Di?logo para cargo inicial -->
+    </div>    <!-- Diálogo para cargo inicial -->
     <dialog ref="initialChargeDialog" class="dialog">
       <form class="dialog-form" @submit.prevent="saveInitialCharge">        <h2>Cargo inicial</h2>
-        <div class="two-cols">          <label>C?digo del cargo
+        <div class="two-cols">          <label>Código del cargo
             <select v-model="editingInitialCharge.code">
               <option>NOTARY_FEES</option>
               <option>REGISTRATION_FEES</option>
@@ -288,10 +288,10 @@
           <button type="submit" class="primary">Guardar</button>
         </div>
       </form>
-    </dialog>    <!-- Di?logo para cargo peri?dico -->
+    </dialog>    <!-- Diálogo para cargo periódico -->
     <dialog ref="periodicChargeDialog" class="dialog">
-      <form class="dialog-form" @submit.prevent="savePeriodicCharge">        <h2>Cargo peri?dico</h2>
-        <div class="two-cols">          <label>C?digo del cargo
+      <form class="dialog-form" @submit.prevent="savePeriodicCharge">        <h2>Cargo periódico</h2>
+        <div class="two-cols">          <label>Código del cargo
             <select v-model="editingPeriodicCharge.code">
               <option>POSTAGE</option>
               <option>ADMIN_FEE</option>
@@ -435,12 +435,12 @@ const loadingExchange = ref(false)
 const initialCharges = ref([
   { code: 'NOTARY_FEES', label: 'Gastos notariales', amount: 100, currency: 'USD', financingMode: 'FINANCED', taxable: false },
   { code: 'REGISTRATION_FEES', label: 'Costos registrales', amount: 50, currency: 'USD', financingMode: 'FINANCED', taxable: false },
-  { code: 'STUDY_COMMISSION', label: 'Comisi?n de estudio', amount: 30, currency: 'USD', financingMode: 'FINANCED', taxable: false }
+  { code: 'STUDY_COMMISSION', label: 'Comisión de estudio', amount: 30, currency: 'USD', financingMode: 'FINANCED', taxable: false }
 ])
 
 const periodicCharges = ref([
   { code: 'POSTAGE', label: 'Portes', chargeType: 'FIXED_AMOUNT', amount: 20, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
-  { code: 'ADMIN_FEE', label: 'Gastos de administraci?n', chargeType: 'FIXED_AMOUNT', amount: 40, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
+  { code: 'ADMIN_FEE', label: 'Gastos de administración', chargeType: 'FIXED_AMOUNT', amount: 40, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
   { code: 'LIFE_INSURANCE', label: 'Seguro de desgravamen', chargeType: 'RATE', amount: null, currency: null, ratePercent: 0.05, rateBase: 'OPENING_BALANCE', frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
   { code: 'VEHICLE_INSURANCE', label: 'Seguro vehicular todo riesgo', chargeType: 'RATE', amount: null, currency: null, ratePercent: 4.50, rateBase: 'VEHICLE_PRICE', frequency: 'ANNUAL_PRORATED_MONTHLY', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 }
 ])
@@ -716,7 +716,7 @@ async function loadCurrentExchangeRate(showToast = true) {
 function buildQuoteRequest() {
   const client = getSelectedClient()
   const vehicle = getSelectedVehicle()
-  if (!client || !vehicle) {    throw new Error('Selecciona primero un cliente y un veh?culo.')
+  if (!client || !vehicle) {    throw new Error('Selecciona primero un cliente y un vehículo.')
   }
 
   const termMonths = loan.termMonths
@@ -816,12 +816,12 @@ function resetForm() {
   initialCharges.value = [
     { code: 'NOTARY_FEES', label: 'Gastos notariales', amount: 100, currency: 'USD', financingMode: 'FINANCED', taxable: false },
     { code: 'REGISTRATION_FEES', label: 'Costos registrales', amount: 50, currency: 'USD', financingMode: 'FINANCED', taxable: false },
-    { code: 'STUDY_COMMISSION', label: 'Comisi?n de estudio', amount: 30, currency: 'USD', financingMode: 'FINANCED', taxable: false }
+    { code: 'STUDY_COMMISSION', label: 'Comisión de estudio', amount: 30, currency: 'USD', financingMode: 'FINANCED', taxable: false }
   ]
 
   periodicCharges.value = [
     { code: 'POSTAGE', label: 'Portes', chargeType: 'FIXED_AMOUNT', amount: 20, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
-    { code: 'ADMIN_FEE', label: 'Gastos de administraci?n', chargeType: 'FIXED_AMOUNT', amount: 40, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
+    { code: 'ADMIN_FEE', label: 'Gastos de administración', chargeType: 'FIXED_AMOUNT', amount: 40, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
     { code: 'LIFE_INSURANCE', label: 'Seguro de desgravamen', chargeType: 'RATE', amount: null, currency: null, ratePercent: 0.05, rateBase: 'OPENING_BALANCE', frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
     { code: 'VEHICLE_INSURANCE', label: 'Seguro vehicular todo riesgo', chargeType: 'RATE', amount: null, currency: null, ratePercent: 4.50, rateBase: 'VEHICLE_PRICE', frequency: 'ANNUAL_PRORATED_MONTHLY', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 }
   ]
@@ -912,10 +912,11 @@ onMounted(() => {
 }
 .layout-quote {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 32px;
   align-items: start;
-  max-width: 1040px;
+  max-width: none;
+  width: 100%;
 }
 .left-stack {
   display: grid;
