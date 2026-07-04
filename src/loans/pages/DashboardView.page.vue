@@ -2,44 +2,44 @@
   <div class="dashboard">
     <header class="dashboard-header">
       <div>
-        <h1>Dashboard</h1>
-        <p>Structured overview of your capital cruise performance.</p>
+        <h1>Panel principal</h1>
+        <p>Resumen estructurado del desempeño de Capital Cruise.</p>
       </div>
       <div class="header-actions">
         <button class="action-btn secondary" type="button" @click="goToNewClient">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" fill="currentColor"/></svg>
-          New Client
+          Nuevo cliente
         </button>
         <button class="action-btn secondary" type="button" @click="goToNewVehicle">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z" fill="currentColor"/></svg>
-          New Vehicle
+          Nuevo vehículo
         </button>
         <button class="action-btn primary" type="button" @click="goToNewOperation">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" fill="currentColor"/></svg>
-          New Operation
+          Nueva operación
         </button>
       </div>
     </header>
 
     <section class="metrics-grid">
       <article class="metric-card">
-        <span class="metric-label">Total Clients</span>
+        <span class="metric-label">Clientes registrados</span>
         <strong class="metric-value">{{ formatCount(clientsCount) }}</strong>
         <span class="metric-trend positive">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 14l5-5 5 5H7z" fill="currentColor"/></svg>
-          Registered clients
+          Clientes activos
         </span>
       </article>
       <article class="metric-card">
-        <span class="metric-label">Total Vehicles</span>
+        <span class="metric-label">Vehículos activos</span>
         <strong class="metric-value">{{ formatCount(vehiclesCount) }}</strong>
         <span class="metric-trend neutral">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2"/></svg>
-          Stable inventory
+          Inventario estable
         </span>
       </article>
       <article class="metric-card">
-        <span class="metric-label">Saved Operations</span>
+        <span class="metric-label">Operaciones guardadas</span>
         <strong class="metric-value">{{ formatCount(operationsCount) }}</strong>
         <span class="metric-trend positive">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 14l5-5 5 5H7z" fill="currentColor"/></svg>
@@ -50,23 +50,23 @@
 
     <section class="recent-card">
       <div class="recent-header">
-        <h2>Recent Operations</h2>
-        <router-link to="/operations" class="view-all">View All History</router-link>
+        <h2>Operaciones recientes</h2>
+        <router-link to="/operations" class="view-all">Ver historial completo</router-link>
       </div>
 
-      <div v-if="loading" class="table-state">Loading recent operations...</div>
+      <div v-if="loading" class="table-state">Cargando operaciones recientes...</div>
       <div v-else-if="recentOperations.length === 0" class="table-state">
-        No operations yet. Create your first operation to see it here.
+        Aún no hay operaciones. Crea tu primera operación para verla aquí.
       </div>
       <div v-else class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Client</th>
-              <th>Vehicle</th>
-              <th>Amount</th>
-              <th>Date</th>
-              <th>Status</th>
+              <th>Cliente</th>
+              <th>Vehículo</th>
+              <th>Monto</th>
+              <th>Fecha</th>
+              <th>Estado</th>
             </tr>
           </thead>
           <tbody>
@@ -118,9 +118,9 @@ const recentOperations = ref([])
 
 const savedOperationsLabel = computed(() => {
   if (savedCount.value > 0) {
-    return `${savedCount.value} saved`
+    return `${savedCount.value} guardadas`
   }
-  return 'No saved yet'
+  return 'Sin operaciones guardadas'
 })
 
 function goToNewClient() {
@@ -141,12 +141,12 @@ function openOperation(operationId) {
 
 function formatCount(value) {
   if (value === null || value === undefined) return '--'
-  return new Intl.NumberFormat('en-US').format(value)
+  return new Intl.NumberFormat('es-PE').format(value)
 }
 
 function formatAmount(amount, currency = 'USD') {
   if (amount === null || amount === undefined) return '—'
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('es-PE', {
     style: 'currency',
     currency: currency || 'USD'
   }).format(Number(amount))
@@ -154,7 +154,7 @@ function formatAmount(amount, currency = 'USD') {
 
 function formatDate(value) {
   if (!value) return '—'
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('es-PE', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
@@ -178,17 +178,17 @@ function avatarColor(name = '') {
 
 function statusLabel(status) {
   const map = {
-    SAVED: 'PROCESSED',
-    CALCULATED: 'PENDING',
-    DRAFT: 'PENDING'
+    SAVED: 'Guardada',
+    CALCULATED: 'Calculada',
+    DRAFT: 'Borrador'
   }
-  return map[status] || status || 'PENDING'
+  return map[status] || status || 'Pendiente'
 }
 
 function statusClass(status) {
   const label = statusLabel(status)
-  if (label === 'PROCESSED') return 'processed'
-  if (label === 'FAILED') return 'failed'
+  if (label === 'Guardada') return 'processed'
+  if (label === 'Fallida') return 'failed'
   return 'pending'
 }
 

@@ -2,7 +2,7 @@
   <div class="support-page">
     <header class="support-header">
       <div>
-        <h1>Soporte</h1>
+        <h1>Ayuda y asistencia técnica</h1>
         <p>
           Encuentra respuestas frecuentes, envía sugerencias o solicita ayuda, y consulta los
           términos y condiciones de uso de Capital Cruise.
@@ -78,8 +78,8 @@
             </li>
           </ul>
           <p class="contact-note">
-            Este formulario es informativo. Al enviarlo recibirá una confirmación local; el equipo
-            de soporte revisará su mensaje según la prioridad del caso.
+            Este formulario es informativo. Al enviarlo recibirás una confirmación local; el equipo
+            de soporte revisará tu mensaje según la prioridad del caso.
           </p>
         </aside>
 
@@ -111,7 +111,7 @@
           <div class="form-row">
             <label for="contact-category">Tipo de mensaje</label>
             <select id="contact-category" v-model="form.category" required>
-              <option disabled value="">Seleccione una opción</option>
+              <option disabled value="">Selecciona una opción</option>
               <option
                 v-for="category in contactCategories"
                 :key="category.value"
@@ -130,7 +130,7 @@
               type="text"
               required
               maxlength="160"
-              placeholder="Resumen breve de su consulta"
+              placeholder="Resumen breve de tu consulta"
             />
           </div>
 
@@ -142,7 +142,7 @@
               required
               rows="6"
               maxlength="2000"
-              placeholder="Describa su sugerencia, queja o solicitud de ayuda con el mayor detalle posible."
+              placeholder="Describe tu sugerencia, queja o solicitud de ayuda con el mayor detalle posible."
             />
           </div>
 
@@ -166,11 +166,7 @@
       <div class="terms-card">
         <p class="terms-updated">Última actualización: julio 2026</p>
 
-        <article
-          v-for="section in termsSections"
-          :key="section.title"
-          class="terms-block"
-        >
+        <article v-for="section in termsSections" :key="section.title" class="terms-block">
           <h3>{{ section.title }}</h3>
           <p v-for="(paragraph, index) in section.paragraphs" :key="index">
             {{ paragraph }}
@@ -227,9 +223,7 @@ function submitContactForm() {
   const categoryLabel =
     contactCategories.find((item) => item.value === form.value.category)?.label || 'Consulta'
 
-  toastService.success(
-    `Mensaje registrado (${categoryLabel}). El equipo de soporte revisará su solicitud.`
-  )
+  toastService.success(`Mensaje registrado (${categoryLabel}). El equipo de soporte revisará tu solicitud.`)
   resetForm()
 }
 </script>

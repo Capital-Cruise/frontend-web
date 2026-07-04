@@ -2,13 +2,13 @@
   <div>
     <div class="card result-header">
       <div>
-        <h2 id="resultTitle">Simulation</h2>
+        <h2 id="resultTitle">Simulación</h2>
         <p id="resultSubtitle">{{ subtitle }}</p>
       </div>
       <div class="button-row">
-        <button class="secondary" @click="$emit('back')">Back to Form</button>
-        <button class="primary" @click="$emit('save')">Save Operation</button>
-        <button class="secondary" @click="$emit('share')">Share Saved Operation</button>
+        <button class="secondary" @click="$emit('back')">Volver al formulario</button>
+        <button class="primary" @click="$emit('save')">Guardar operación</button>
+        <button class="secondary" @click="$emit('share')">Compartir operación guardada</button>
       </div>
     </div>
 
@@ -21,25 +21,27 @@
 
     <div class="split result-split">
       <section class="card">
-        <h2>Initial Charges</h2>
-        <div v-if="initialCharges.length === 0">No initial charges.</div>
+        <h2>Cargos iniciales</h2>
+        <div v-if="initialCharges.length === 0">No hay cargos iniciales.</div>
         <div class="mini-table" v-else>
           <table>
-            <thead><tr><th>Code</th><th>Label</th><th>Amount</th><th>Mode</th><th>Effect</th></tr></thead>
+            <thead>
+              <tr><th>Código</th><th>Nombre</th><th>Monto</th><th>Modo</th><th>Efecto</th></tr>
+            </thead>
             <tbody>
-            <tr v-for="(c, i) in initialCharges" :key="i">
-              <td>{{ c.code }}</td>
-              <td>{{ c.label }}</td>
-              <td>{{ formatMoney(c.amount, c.currency) }}</td>
-              <td>{{ c.financingMode }}</td>
-              <td>{{ effectOfFinancing(c.financingMode) }}</td>
-            </tr>
+              <tr v-for="(c, i) in initialCharges" :key="i">
+                <td>{{ c.code }}</td>
+                <td>{{ c.label }}</td>
+                <td>{{ formatMoney(c.amount, c.currency) }}</td>
+                <td>{{ c.financingMode }}</td>
+                <td>{{ effectOfFinancing(c.financingMode) }}</td>
+              </tr>
             </tbody>
           </table>
         </div>
       </section>
       <section class="card">
-        <h2>Financial Totals</h2>
+        <h2>Totales financieros</h2>
         <div class="list">
           <div v-for="(item, idx) in totals" :key="idx" class="list-item">
             <span class="meta">{{ item.label }}</span>
@@ -50,54 +52,55 @@
     </div>
 
     <section class="card">
-      <h2>Periodic Charges Detail</h2>
-      <div v-if="periodicCharges.length === 0">No periodic charges.</div>
+      <h2>Detalle de cargos periódicos</h2>
+      <div v-if="periodicCharges.length === 0">No hay cargos periódicos.</div>
       <div class="mini-table" v-else>
         <table>
-          <thead><tr><th>Code</th><th>Label</th><th>Type</th><th>Value</th><th>Base</th><th>Frequency</th><th>Range</th></tr></thead>
+          <thead>
+            <tr><th>Código</th><th>Nombre</th><th>Tipo</th><th>Valor</th><th>Base</th><th>Frecuencia</th><th>Rango</th></tr>
+          </thead>
           <tbody>
-          <tr v-for="(c, i) in periodicCharges" :key="i">
-            <td>{{ c.code }}</td>
-            <td>{{ c.label }}</td>
-            <td>{{ c.chargeType }}</td>
-            <td>{{ c.chargeType === 'FIXED_AMOUNT' ? formatMoney(c.amount, c.currency) : formatPercent(c.ratePercent) }}</td>
-            <td>{{ c.rateBase || '---' }}</td>
-            <td>{{ c.frequency }}</td>
-            <td>{{ c.fromInstallment }}-{{ c.toInstallment }}</td>
-          </tr>
+            <tr v-for="(c, i) in periodicCharges" :key="i">
+              <td>{{ c.code }}</td>
+              <td>{{ c.label }}</td>
+              <td>{{ c.chargeType }}</td>
+              <td>{{ c.chargeType === 'FIXED_AMOUNT' ? formatMoney(c.amount, c.currency) : formatPercent(c.ratePercent) }}</td>
+              <td>{{ c.rateBase || '---' }}</td>
+              <td>{{ c.frequency }}</td>
+              <td>{{ c.fromInstallment }}-{{ c.toInstallment }}</td>
+            </tr>
           </tbody>
         </table>
       </div>
     </section>
 
     <section class="card">
-      <h2>Amortization Schedule</h2>
-      <div v-if="schedule.length === 0">No schedule data.</div>
+      <h2>Cronograma de pagos</h2>
+      <div v-if="schedule.length === 0">No hay datos de cronograma.</div>
       <div class="mini-table" v-else>
         <table>
           <thead>
-          <tr><th>#</th><th>Date</th><th>Grace</th><th>Opening Balance</th><th>Interest</th><th>Financial Installment</th><th>Insurance</th><th>Charges</th><th>Balloon</th><th>Total</th><th>Closing Balance</th></tr>
+            <tr><th>#</th><th>Fecha</th><th>Gracia</th><th>Saldo inicial</th><th>Interés</th><th>Cuota financiera</th><th>Seguros</th><th>Cargos</th><th>Balloon</th><th>Total</th><th>Saldo final</th></tr>
           </thead>
           <tbody>
-          <tr v-for="(s, idx) in schedule.slice(0, 60)" :key="idx">
-            <td>{{ s.installmentNumber }}</td>
-            <td>{{ s.dueDate }}</td>
-            <td>{{ s.graceTypeApplied }}</td>
-            <td>{{ formatMoney(s.openingBalance) }}</td>
-            <td>{{ formatMoney(s.interest) }}</td>
-            <td>{{ formatMoney(s.baseInstallment) }}</td>
-            <td>{{ formatMoney(s.insuranceAmount) }}</td>
-            <td>{{ formatMoney(s.additionalChargeAmount) }}</td>
-            <td>{{ formatMoney(s.balloonPortion) }}</td>
-            <td>{{ formatMoney(s.totalInstallment) }}</td>
-            <td>{{ formatMoney(s.closingBalance) }}</td>
-          </tr>
+            <tr v-for="(s, idx) in schedule.slice(0, 60)" :key="idx">
+              <td>{{ s.installmentNumber }}</td>
+              <td>{{ s.dueDate }}</td>
+              <td>{{ s.graceTypeApplied }}</td>
+              <td>{{ formatMoney(s.openingBalance) }}</td>
+              <td>{{ formatMoney(s.interest) }}</td>
+              <td>{{ formatMoney(s.baseInstallment) }}</td>
+              <td>{{ formatMoney(s.insuranceAmount) }}</td>
+              <td>{{ formatMoney(s.additionalChargeAmount) }}</td>
+              <td>{{ formatMoney(s.balloonPortion) }}</td>
+              <td>{{ formatMoney(s.totalInstallment) }}</td>
+              <td>{{ formatMoney(s.closingBalance) }}</td>
+            </tr>
           </tbody>
         </table>
-        <p v-if="schedule.length > 60" class="hint">Showing first 60 of {{ schedule.length }} installments.</p>
+        <p v-if="schedule.length > 60" class="hint">Mostrando los primeros 60 de {{ schedule.length }} periodos.</p>
       </div>
     </section>
-
   </div>
 </template>
 
@@ -119,22 +122,22 @@ const schedule = computed(() => calc.value?.schedule || props.calculation?.sched
 const subtitle = computed(() => {
   const req = props.request
   if (req) {
-    return `${req.client?.displayName || 'Client'} · ${req.vehicle?.brand || ''} ${req.vehicle?.model || ''}`
+    return `${req.client?.displayName || 'Cliente'} · ${req.vehicle?.brand || ''} ${req.vehicle?.model || ''}`
   }
-  return 'No calculation loaded.'
+  return 'No hay una simulación cargada.'
 })
 
 const initialCharges = computed(() => props.request?.additionalCharges?.initialCharges || [])
 const periodicCharges = computed(() => props.request?.additionalCharges?.periodicCharges || [])
 
 const summaryCards = computed(() => [
-  { label: 'Vehicle Price', value: formatMoney(summary.value.vehiclePrice ?? props.request?.vehicle?.vehiclePrice, props.request?.loan?.operationCurrency) },
-  { label: 'Down Payment', value: formatMoney(summary.value.downPaymentAmount, props.request?.loan?.operationCurrency) },
-  { label: 'Initial Charges Financed', value: formatMoney(summary.value.initialChargesFinanced, props.request?.loan?.operationCurrency) },
-  { label: 'Principal Financed', value: formatMoney(summary.value.principalFinanced, props.request?.loan?.operationCurrency) },
-  { label: 'Balloon Payment', value: formatMoney(summary.value.balloonAmount, props.request?.loan?.operationCurrency) },
-  { label: 'Base Installment', value: formatMoney(summary.value.baseInstallment, props.request?.loan?.operationCurrency) },
-  { label: 'Total Payable', value: formatMoney(summary.value.totalPayable, props.request?.loan?.operationCurrency) },
+  { label: 'Precio del vehículo', value: formatMoney(summary.value.vehiclePrice ?? props.request?.vehicle?.vehiclePrice, props.request?.loan?.operationCurrency) },
+  { label: 'Cuota inicial', value: formatMoney(summary.value.downPaymentAmount, props.request?.loan?.operationCurrency) },
+  { label: 'Cargos iniciales financiados', value: formatMoney(summary.value.initialChargesFinanced, props.request?.loan?.operationCurrency) },
+  { label: 'Principal financiado', value: formatMoney(summary.value.principalFinanced, props.request?.loan?.operationCurrency) },
+  { label: 'Cuota balloon', value: formatMoney(summary.value.balloonAmount, props.request?.loan?.operationCurrency) },
+  { label: 'Cuota base', value: formatMoney(summary.value.baseInstallment, props.request?.loan?.operationCurrency) },
+  { label: 'Total a pagar', value: formatMoney(summary.value.totalPayable, props.request?.loan?.operationCurrency) },
   { label: 'TCEA', value: formatPercent((indicators.value.effectiveAnnualCost ?? 0) * ((Math.abs(indicators.value.effectiveAnnualCost ?? 0) < 1) ? 100 : 1)) }
 ])
 
@@ -142,28 +145,28 @@ const totals = computed(() => {
   const currency = props.request?.loan?.operationCurrency || 'USD'
   return [
     { label: 'Principal', value: formatMoney(summary.value.principalFinanced, currency) },
-    { label: 'Interest', value: formatMoney(summary.value.totalInterest, currency) },
-    { label: 'Periodic Charges', value: formatMoney(summary.value.totalPeriodicCharges, currency) },
-    { label: 'Insurance', value: formatMoney(summary.value.totalInsurance, currency) },
+    { label: 'Interés', value: formatMoney(summary.value.totalInterest, currency) },
+    { label: 'Cargos periódicos', value: formatMoney(summary.value.totalPeriodicCharges, currency) },
+    { label: 'Seguros', value: formatMoney(summary.value.totalInsurance, currency) },
     { label: 'Balloon', value: formatMoney(summary.value.balloonAmount, currency) },
-    { label: 'Total Payable', value: formatMoney(summary.value.totalPayable, currency), danger: true }
+    { label: 'Total a pagar', value: formatMoney(summary.value.totalPayable, currency), danger: true }
   ]
 })
 
 function formatMoney(value, currency = 'USD') {
   const n = Number(value ?? 0)
-  return `${currency} ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  return `${currency} ${n.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 function formatPercent(value) {
   const n = Number(value ?? 0)
-  return `${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+  return `${n.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
 }
 
 function effectOfFinancing(mode) {
-  if (mode === 'FINANCED') return 'Added to principal'
-  if (mode === 'PAID_UPFRONT') return 'Paid at signing'
-  if (mode === 'WITHHELD') return 'Deducted from disbursement'
+  if (mode === 'FINANCED') return 'Se suma al principal'
+  if (mode === 'PAID_UPFRONT') return 'Se paga al inicio'
+  if (mode === 'WITHHELD') return 'Se retiene del desembolso'
   return ''
 }
 </script>

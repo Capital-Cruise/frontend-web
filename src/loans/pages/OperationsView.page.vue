@@ -2,39 +2,39 @@
   <div class="card">
     <div class="section-head">
       <div>
-        <h2>Operation History</h2>
-        <p>Review saved financial simulations.</p>
+        <h2>Historial de operaciones</h2>
+        <p>Revisa las simulaciones financieras guardadas.</p>
       </div>
-      <button class="secondary" @click="loadOperations">Load Operations</button>
+      <button class="secondary" @click="loadOperations">Cargar operaciones</button>
     </div>
     <div class="filters">
-      <input v-model="filters.client" placeholder="Filter by client name..." />
+      <input v-model="filters.client" placeholder="Filtrar por nombre del cliente..." />
       <select v-model="filters.currency">
-        <option value="">All Currencies</option>
+        <option value="">Todas las monedas</option>
         <option>USD</option>
         <option>PEN</option>
       </select>
       <select v-model="filters.status">
-        <option value="">Any Status</option>
+        <option value="">Cualquier estado</option>
         <option>SAVED</option>
         <option>CALCULATED</option>
         <option>DRAFT</option>
       </select>
-      <button class="secondary" @click="applyFilters">Apply Filters</button>
+      <button class="secondary" @click="applyFilters">Aplicar filtros</button>
     </div>
     <div v-if="operations.length === 0" class="operation-grid">
-      <p>No operations loaded.</p>
+      <p>No hay operaciones cargadas.</p>
     </div>
     <div v-else class="operation-grid">
       <div v-for="op in filteredOperations" :key="op.identifier" class="operation-card">
-        <span class="meta">Asset Profile</span>
+        <span class="meta">Perfil del activo</span>
         <strong>{{ op.title }}</strong>
-        <span class="meta">Primary Client</span>
+        <span class="meta">Cliente principal</span>
         <strong>{{ op.displayClient }}</strong>
-        <div class="meta">ID: {{ op.identifier }} · Status: {{ op.status }} · Currency: {{ op.currency }}</div>
+        <div class="meta">ID: {{ op.identifier }} · Estado: {{ op.status }} · Moneda: {{ op.currency }}</div>
         <div class="button-row">
-          <button class="secondary" @click="$emit('view-detail', op.identifier)">Open</button>
-          <button class="primary" @click="$emit('share', op.identifier)">Share</button>
+          <button class="secondary" @click="$emit('view-detail', op.identifier)">Abrir</button>
+          <button class="primary" @click="$emit('share', op.identifier)">Compartir</button>
         </div>
       </div>
     </div>

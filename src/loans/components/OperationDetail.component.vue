@@ -3,13 +3,13 @@
     <div class="card">
       <div class="section-head">
         <div>
-          <h2>Operation Detail</h2>
-          <p>Fetch operation, schedule and indicators.</p>
+          <h2>Detalle de operación</h2>
+          <p>Consulta la operación, el cronograma y los indicadores.</p>
         </div>
         <div class="inline-form">
-          <input v-model="operationId" placeholder="Operation ID" />
-          <button class="secondary" @click="loadDetail">Load Detail</button>
-          <button class="primary" @click="createShare">Create Share</button>
+          <input v-model="operationId" placeholder="ID de operación" />
+          <button class="secondary" @click="loadDetail">Cargar detalle</button>
+          <button class="primary" @click="createShare">Crear enlace</button>
         </div>
       </div>
     </div>
@@ -22,40 +22,40 @@
     </div>
 
     <section class="card">
-      <h2>Operation JSON</h2>
+      <h2>JSON de la operación</h2>
       <pre class="debug">{{ JSON.stringify(detail, null, 2) }}</pre>
     </section>
 
     <section class="card">
-      <h2>Schedule</h2>
-      <div v-if="schedule.length === 0">No schedule data.</div>
+      <h2>Cronograma</h2>
+      <div v-if="schedule.length === 0">No hay datos de cronograma.</div>
       <div class="mini-table" v-else>
         <table>
           <thead>
-          <tr><th>#</th><th>Date</th><th>Grace</th><th>Opening Balance</th><th>Interest</th><th>Financial Installment</th><th>Insurance</th><th>Charges</th><th>Balloon</th><th>Total</th><th>Closing Balance</th></tr>
+            <tr><th>#</th><th>Fecha</th><th>Gracia</th><th>Saldo inicial</th><th>Interés</th><th>Cuota financiera</th><th>Seguros</th><th>Cargos</th><th>Balloon</th><th>Total</th><th>Saldo final</th></tr>
           </thead>
           <tbody>
-          <tr v-for="(s, idx) in schedule.slice(0, 60)" :key="idx">
-            <td>{{ s.installmentNumber }}</td>
-            <td>{{ s.dueDate }}</td>
-            <td>{{ s.graceTypeApplied }}</td>
-            <td>{{ formatMoney(s.openingBalance) }}</td>
-            <td>{{ formatMoney(s.interest) }}</td>
-            <td>{{ formatMoney(s.baseInstallment) }}</td>
-            <td>{{ formatMoney(s.insuranceAmount) }}</td>
-            <td>{{ formatMoney(s.additionalChargeAmount) }}</td>
-            <td>{{ formatMoney(s.balloonPortion) }}</td>
-            <td>{{ formatMoney(s.totalInstallment) }}</td>
-            <td>{{ formatMoney(s.closingBalance) }}</td>
-          </tr>
+            <tr v-for="(s, idx) in schedule.slice(0, 60)" :key="idx">
+              <td>{{ s.installmentNumber }}</td>
+              <td>{{ s.dueDate }}</td>
+              <td>{{ s.graceTypeApplied }}</td>
+              <td>{{ formatMoney(s.openingBalance) }}</td>
+              <td>{{ formatMoney(s.interest) }}</td>
+              <td>{{ formatMoney(s.baseInstallment) }}</td>
+              <td>{{ formatMoney(s.insuranceAmount) }}</td>
+              <td>{{ formatMoney(s.additionalChargeAmount) }}</td>
+              <td>{{ formatMoney(s.balloonPortion) }}</td>
+              <td>{{ formatMoney(s.totalInstallment) }}</td>
+              <td>{{ formatMoney(s.closingBalance) }}</td>
+            </tr>
           </tbody>
         </table>
-        <p v-if="schedule.length > 60" class="hint">Showing first 60 of {{ schedule.length }} installments.</p>
+        <p v-if="schedule.length > 60" class="hint">Mostrando los primeros 60 de {{ schedule.length }} periodos.</p>
       </div>
     </section>
 
     <section class="card">
-      <h2>Indicators</h2>
+      <h2>Indicadores</h2>
       <pre class="debug">{{ JSON.stringify(indicators, null, 2) }}</pre>
     </section>
   </div>
@@ -63,14 +63,12 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { loanService } from '../services/loan.service.js'
 import { toastService } from '../../shared/services/toast.service.js'
 
-const props = defineProps({
-  operationId: { type: String, default: '' }
-})
-
-const emit = defineEmits(['load-detail', 'share'])
-
+const route = useRoute()
+const operationId = ref(route.params.id || '')
 const detail = ref(null)
 const schedule = ref([])
 const indicators = ref(null)
@@ -78,32 +76,52 @@ const indicators = ref(null)
 const detailCards = computed(() => {
   const d = detail.value || {}
   return [
-    { label: 'Operation ID', value: props.operationId || '--' },
-    { label: 'Status', value: d.status || '--' },
-    { label: 'Currency', value: d.currency || d.operationCurrency || '--' },
-    { label: 'Schedule Rows', value: Array.isArray(schedule.value) ? schedule.value.length : '--' }
+    { label: 'ID de operación', value: operationId.value || '--' },
+    { label: 'Estado', value: d.status || '--' },
+    { label: 'Moneda', value: d.currency || d.operationCurrency || '--' },
+    { label: 'Filas del cronograma', value: Array.isArray(schedule.value) ? schedule.value.length : '--' }
   ]
 })
 
-function loadDetail() {
-  if (!props.operationId) {
-    toastService.warning('Provide operation ID')
+async function loadDetail() {
+  if (!operationId.value) {
+    toastService.warning('Ingresa el ID de la operación.')
     return
   }
-  emit('load-detail', props.operationId)
+  try {
+    const [detailData, scheduleData, indicatorsData] = await Promise.all([
+      loanService.getOperationDetail(operationId.value),
+      loanService.getOperationSchedule(operationId.value),
+      loanService.getOperationIndicators(operationId.value)
+    ])
+    detail.value = detailData
+    schedule.value = Array.isArray(scheduleData) ? scheduleData : loanService.unwrapPage(scheduleData)
+    indicators.value = indicatorsData
+  } catch (err) {
+    toastService.error(err.message)
+  }
 }
 
-function createShare() {
-  if (!props.operationId) {
-    toastService.warning('Load an operation first')
+async function createShare() {
+  if (!operationId.value) {
+    toastService.warning('Primero carga una operación.')
     return
   }
-  emit('share', props.operationId)
+  try {
+    const data = await loanService.createPublicShare(operationId.value)
+    toastService.success(`Enlace creado: ${data.shareUrl || data.shareToken}`)
+  } catch (err) {
+    toastService.error(err.message)
+  }
 }
 
 function formatMoney(value, currency = 'USD') {
   const n = Number(value ?? 0)
-  return `${currency} ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  return `${currency} ${n.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+if (route.params.id) {
+  loadDetail()
 }
 </script>
 

@@ -2,16 +2,16 @@
   <div class="register-page">
     <header class="register-header">
       <nav class="breadcrumb" aria-label="Breadcrumb">
-        <button type="button" class="crumb-link" @click="$emit('cancel')">Client Directory</button>
+        <button type="button" class="crumb-link" @click="$emit('cancel')">Clientes</button>
         <span class="crumb-separator">›</span>
-        <span class="crumb-current">{{ isEdit ? 'Edit' : 'Registration' }}</span>
+        <span class="crumb-current">{{ isEdit ? 'Edición' : 'Registro' }}</span>
       </nav>
-      <h1>{{ isEdit ? 'Edit Client' : 'Register New Client' }}</h1>
+      <h1>{{ isEdit ? 'Editar cliente' : 'Registrar nuevo cliente' }}</h1>
       <p>
         {{
           isEdit
-            ? 'Update the client profile and keep the financial registry aligned with the latest information.'
-            : "Initialize the credit simulation by providing the client's architectural financial profile."
+            ? 'Actualiza el perfil del cliente y mantén el registro financiero alineado con la información más reciente.'
+            : 'Inicia la simulación de crédito proporcionando el perfil financiero del cliente.'
         }}
       </p>
     </header>
@@ -27,28 +27,28 @@
               />
             </svg>
           </span>
-          <h2>Personal Identity</h2>
+          <h2>Identidad personal</h2>
         </div>
         <div class="field-grid">
           <label>
-            First Name
-            <input ref="firstFieldRef" v-model="form.firstName" placeholder="e.g., Jonathan" required />
+            Nombres
+            <input ref="firstFieldRef" v-model="form.firstName" placeholder="Ej. Jonathan" required />
           </label>
           <label>
-            Last Name
-            <input v-model="form.lastName" placeholder="e.g., Wick" required />
+            Apellidos
+            <input v-model="form.lastName" placeholder="Ej. Wick" required />
           </label>
           <label>
-            Document Type
+            Tipo de documento
             <select v-model="form.documentType">
-              <option value="DNI">National ID / Passport</option>
-              <option value="PASSPORT">Passport</option>
-              <option value="CE">Foreign Resident Card</option>
-              <option value="RUC">Tax ID (RUC)</option>
+              <option value="DNI">DNI</option>
+              <option value="PASSPORT">Pasaporte</option>
+              <option value="CE">Carné de extranjería</option>
+              <option value="RUC">RUC</option>
             </select>
           </label>
           <label>
-            Document Number
+            Número de documento
             <input v-model="form.documentNumber" placeholder="XX-XXXX-XXXXX" required />
           </label>
         </div>
@@ -64,20 +64,20 @@
               />
             </svg>
           </span>
-          <h2>Connectivity &amp; Address</h2>
+          <h2>Contacto y dirección</h2>
         </div>
         <div class="field-grid">
           <label>
-            Email Address
-            <input v-model="form.email" type="email" placeholder="client@capitalcruise.com" />
+            Correo electrónico
+            <input v-model="form.email" type="email" placeholder="cliente@capitalcruise.com" />
           </label>
           <label>
-            Phone Number
-            <input v-model="form.phone" placeholder="+1 (555) 000-0000" />
+            Teléfono
+            <input v-model="form.phone" placeholder="+51 999 999 999" />
           </label>
           <label class="full-width">
-            Residential Address
-            <input v-model="form.address" placeholder="Street name, Number, Suite, City, Zip" />
+            Dirección
+            <input v-model="form.address" placeholder="Calle, número, distrito, ciudad" />
           </label>
         </div>
       </section>
@@ -92,13 +92,13 @@
               />
             </svg>
           </span>
-          <h2>Financial Framework</h2>
+          <h2>Marco financiero</h2>
         </div>
         <div class="field-grid">
           <label>
-            Monthly Income
+            Ingreso mensual
             <div class="money-input">
-              <span>$</span>
+              <span>S/</span>
               <input
                 v-model.number="form.monthlyIncome"
                 type="number"
@@ -108,19 +108,19 @@
               />
             </div>
             <small>
-              This figure is critical for determining the Debt-to-Income (DTI) ratio and final
-              credit score ceiling.
+              Este dato es clave para determinar la relación cuota-ingreso y el límite final del
+              perfil crediticio.
             </small>
           </label>
           <label class="full-width">
-            Internal Notes
-            <textarea v-model="form.notes" placeholder="Confidential advisor remarks..." />
+            Observaciones
+            <textarea v-model="form.notes" placeholder="Anotaciones confidenciales del asesor..." />
           </label>
         </div>
       </section>
 
       <footer class="form-actions">
-        <button type="button" class="cancel-btn" @click="$emit('cancel')">Cancel</button>
+        <button type="button" class="cancel-btn" @click="$emit('cancel')">Cancelar</button>
         <button type="submit" class="save-btn" :disabled="loading">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -128,7 +128,7 @@
               fill="currentColor"
             />
           </svg>
-          {{ loading ? 'Saving...' : isEdit ? 'Update Client' : 'Save Client' }}
+          {{ loading ? 'Guardando...' : isEdit ? 'Actualizar cliente' : 'Guardar cliente' }}
         </button>
       </footer>
 

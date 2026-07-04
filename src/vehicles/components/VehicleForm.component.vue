@@ -2,16 +2,16 @@
   <div class="register-page">
     <header class="register-header">
       <nav class="breadcrumb" aria-label="Breadcrumb">
-        <button type="button" class="crumb-link" @click="$emit('cancel')">Vehicle Inventory</button>
+        <button type="button" class="crumb-link" @click="$emit('cancel')">Vehículos</button>
         <span class="crumb-separator">›</span>
-        <span class="crumb-current">{{ isEdit ? 'Edit' : 'Registration' }}</span>
+        <span class="crumb-current">{{ isEdit ? 'Edición' : 'Registro' }}</span>
       </nav>
-      <h1>{{ isEdit ? 'Edit Vehicle' : 'Register New Vehicle' }}</h1>
+      <h1>{{ isEdit ? 'Editar vehículo' : 'Registrar nuevo vehículo' }}</h1>
       <p>
         {{
           isEdit
-            ? 'Update asset specifications and valuation data to keep the portfolio aligned with current market conditions.'
-            : 'Register a new asset in the portfolio with its technical profile and market valuation for loan simulations.'
+            ? 'Actualiza las especificaciones del activo y su valorización para mantener el portafolio alineado con el mercado.'
+            : 'Registra un nuevo activo en el portafolio con su perfil técnico y valorización comercial para simulaciones de crédito.'
         }}
       </p>
     </header>
@@ -27,30 +27,30 @@
               />
             </svg>
           </span>
-          <h2>Asset Identity</h2>
+          <h2>Identidad del activo</h2>
         </div>
         <div class="field-grid">
           <label>
-            Brand
-            <input ref="firstFieldRef" v-model="form.brand" placeholder="e.g., Porsche" required />
+            Marca
+            <input ref="firstFieldRef" v-model="form.brand" placeholder="Ej. Porsche" required />
           </label>
           <label>
-            Model
-            <input v-model="form.model" placeholder="e.g., Taycan" required />
+            Modelo
+            <input v-model="form.model" placeholder="Ej. Taycan" required />
           </label>
           <label>
-            Year
+            Año
             <input v-model.number="form.year" type="number" min="1990" max="2035" required />
           </label>
           <label>
-            Vehicle Type
+            Tipo de vehículo
             <select v-model="form.vehicleType">
-              <option value="SEDAN">Sports Sedan</option>
-              <option value="SUV">Off-Road SUV</option>
-              <option value="PICKUP">Pickup Truck</option>
+              <option value="SEDAN">Sedán deportivo</option>
+              <option value="SUV">SUV</option>
+              <option value="PICKUP">Pick-up</option>
               <option value="HATCHBACK">Hatchback</option>
               <option value="VAN">Van</option>
-              <option value="OTHER">Other</option>
+              <option value="OTHER">Otro</option>
             </select>
           </label>
         </div>
@@ -66,15 +66,15 @@
               />
             </svg>
           </span>
-          <h2>Media &amp; Description</h2>
+          <h2>Imagen y descripción</h2>
         </div>
         <div class="field-grid">
           <label class="full-width">
-            Description
-            <textarea v-model="form.description" placeholder="Technical notes, trim level, condition..." />
+            Descripción
+            <textarea v-model="form.description" placeholder="Notas técnicas, versión, condición..." />
           </label>
           <label class="full-width">
-            Image URL
+            URL de imagen
             <input v-model="form.imageUrl" placeholder="https://..." />
           </label>
         </div>
@@ -90,11 +90,11 @@
               />
             </svg>
           </span>
-          <h2>Market Valuation</h2>
+          <h2>Valorización comercial</h2>
         </div>
         <div class="field-grid">
           <label>
-            Commercial Price
+            Precio comercial
             <div class="money-input">
               <span>$</span>
               <input
@@ -108,7 +108,7 @@
             </div>
           </label>
           <label>
-            Currency
+            Moneda
             <select v-model="form.currency">
               <option value="USD">USD</option>
               <option value="PEN">PEN</option>
@@ -118,7 +118,7 @@
       </section>
 
       <footer class="form-actions">
-        <button type="button" class="cancel-btn" @click="$emit('cancel')">Cancel</button>
+        <button type="button" class="cancel-btn" @click="$emit('cancel')">Cancelar</button>
         <button type="submit" class="save-btn" :disabled="loading">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -126,7 +126,7 @@
               fill="currentColor"
             />
           </svg>
-          {{ loading ? 'Saving...' : isEdit ? 'Update Vehicle' : 'Save Vehicle' }}
+          {{ loading ? 'Guardando...' : isEdit ? 'Actualizar vehículo' : 'Guardar vehículo' }}
         </button>
       </footer>
 

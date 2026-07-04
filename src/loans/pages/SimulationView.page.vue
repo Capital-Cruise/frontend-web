@@ -66,7 +66,7 @@ async function onCalculate(request) {
     const calculation = await loanService.calculateQuote(request)
     saveSimulationRequest(request)
     saveSimulationResult(calculation)
-    toastService.success('Quote calculated successfully')
+    toastService.success('Cotización calculada correctamente.')
     router.push({ name: 'simulation-result' })
   } catch (err) {
     toastService.error(err.message)
@@ -78,13 +78,13 @@ async function onCalculate(request) {
 async function onSave() {
   const request = loadSimulationRequest()
   if (!request) {
-    toastService.warning('Calculate a quote before saving')
+    toastService.warning('Calcula una cotización antes de guardar.')
     return
   }
   saving.value = true
   try {
     savedOperation.value = await loanService.saveOperation(request)
-    toastService.success('Operation saved successfully')
+    toastService.success('Operación guardada correctamente.')
   } catch (err) {
     toastService.error(err.message)
   } finally {

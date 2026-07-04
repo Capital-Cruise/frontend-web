@@ -74,7 +74,7 @@ export const termsSections = [
   {
     title: '2. Marco normativo aplicable',
     paragraphs: [
-      'El diseño y uso de la aplicación se alinea con el marco legal del sistema financiero peruano, incluyendo la Ley N.° 26702 (Ley General del Sistema Financiero y del Sistema de Seguros), la Resolución SBS N.° 8181-2012 (Reglamento de Transparencia de Información y Contratación con Usuarios del Sistema Financiero), la Resolución SBS N.° 3274-2017 (Reglamento de Gestión de Conducta de Mercado del Sistema Financiero), la Resolución SBS N.° 3748-2021 (Reglamento de Comisiones y Gastos del Sistema Financiero) y las disposiciones vigentes sobre seguros asociados al crédito.',
+      'El diseño y uso de la aplicación se alinea con el marco legal del sistema financiero peruano, incluyendo la Ley N.º 26702, la Resolución SBS N.º 8181-2012, la Resolución SBS N.º 3274-2017, la Resolución SBS N.º 3748-2021 y las disposiciones vigentes sobre seguros asociados al crédito.',
       'El usuario se compromete a utilizar la información generada conforme a los principios de transparencia, trazabilidad y sustento financiero exigidos por la Superintendencia de Banca, Seguros y AFP (SBS).'
     ]
   },
@@ -131,6 +131,6 @@ export const termsSections = [
 
 export const supportContactInfo = {
   email: 'soporte@capitalcruise.pe',
-  hours: 'Lunes a viernes, 9:00 a.m. – 6:00 p.m. (hora de Lima)',
+  hours: 'Lunes a viernes, 9:00 a.m. - 6:00 p.m. (hora de Lima)',
   responseTime: 'Respuesta estimada en 1 a 2 días hábiles'
 }

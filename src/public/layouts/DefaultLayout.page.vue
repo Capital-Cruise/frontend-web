@@ -8,8 +8,8 @@
           <p id="viewSubtitle">{{ currentRouteMeta?.subtitle || '' }}</p>
         </div>
         <div class="top-actions">
-          <button class="secondary" @click="reloadCurrentView">Reload Current</button>
-          <button class="secondary" @click="checkHealth">Health</button>
+          <button class="secondary" @click="reloadCurrentView">Recargar vista</button>
+          <button class="secondary" @click="checkHealth">Estado del backend</button>
         </div>
       </header>
       <router-view />
@@ -29,7 +29,7 @@ const router = useRouter()
 const route = useRoute()
 
 const currentRouteName = computed(() => {
-  return route.meta?.title || route.name || 'Dashboard'
+  return route.meta?.title || route.name || 'Panel principal'
 })
 
 const currentRouteMeta = computed(() => route.meta || {})
@@ -45,9 +45,9 @@ function reloadCurrentView() {
 async function checkHealth() {
   try {
     await http.get('/api/v1/health', { noAuth: true })
-    toastService.success('Backend health OK')
+    toastService.success('El backend responde correctamente.')
   } catch (err) {
-    toastService.error(`Backend health: DOWN - ${err.message}`)
+    toastService.error(`Estado del backend: no disponible - ${err.message}`)
   }
 }
 
