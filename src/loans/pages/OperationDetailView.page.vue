@@ -346,7 +346,13 @@ function goBack() {
 }
 
 function recalculate() {
-  router.push('/simulation')
+  router.push({
+    name: 'simulation',
+    query: {
+      mode: 'recalculate',
+      operationId: operationId.value
+    }
+  })
 }
 
 function openShare() {
