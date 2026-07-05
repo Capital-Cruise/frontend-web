@@ -4,12 +4,15 @@ export class Operation {
         this.operationId = data.operationId || data.id || null
         this.status = data.status || ''
         this.currency = data.currency || data.operationCurrency || ''
-        this.vehicleLabel = data.vehicleLabel || ''
+        this.vehicleLabel = data.vehicleLabel || data.vehicleSnapshotLabel || ''
         this.vehicleBrand = data.vehicleBrand || ''
         this.vehicleModel = data.vehicleModel || ''
-        this.clientName = data.clientName || ''
+        this.clientName = data.clientName || data.clientSnapshotName || ''
         this.clientId = data.clientId || ''
         this.createdAt = data.createdAt || ''
+        this.updatedAt = data.updatedAt || ''
+        this.startDate = data.startDate || ''
+        this.termMonths = data.termMonths || null
         this.calculation = data.calculation || null
     }
 

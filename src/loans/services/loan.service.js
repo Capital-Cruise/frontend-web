@@ -11,13 +11,30 @@ class LoanService {
         return new Operation(data)
     }
 
-    async getOperations(status = '', currency = '', page = 0, size = 100) {
-        const params = new URLSearchParams({ page, size, sort: 'createdAt,desc' })
+    async getOperationsPage({ status = '', currency = '', clientId = '', fromDate = '', toDate = '', page = 0, size = 100 } = {}) {
+        const params = new URLSearchParams({
+            page: String(page),
+            size: String(size)
+        })
         if (status) params.set('status', status)
         if (currency) params.set('currency', currency)
+        if (clientId) params.set('clientId', clientId)
+        if (fromDate) params.set('fromDate', fromDate)
+        if (toDate) params.set('toDate', toDate)
         const data = await http.get(`/api/v1/operations?${params.toString()}`)
         const content = this.unwrapPage(data)
-        return content.map(o => new Operation(o))
+        return {
+            operations: content.map(o => new Operation(o)),
+            page: data?.page ?? page,
+            size: data?.size ?? size,
+            totalElements: data?.totalElements ?? content.length,
+            totalPages: data?.totalPages ?? 1
+        }
+    }
+
+    async getOperations(status = '', currency = '', page = 0, size = 100) {
+        const result = await this.getOperationsPage({ status, currency, page, size })
+        return result.operations
     }
 
     async getOperationDetail(operationId) {
