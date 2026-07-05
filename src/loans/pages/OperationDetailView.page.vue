@@ -88,7 +88,12 @@
                 <tr v-for="charge in initialChargeRows" :key="charge.code">
                   <td>{{ charge.code }}</td>
                   <td>{{ charge.label }}</td>
-                  <td>{{ formatMoney(charge.amount) }}</td>
+                  <td>
+                    <div class="money-stack">
+                      <strong>{{ formatMoney(charge.amount, charge.currency || currency) }}</strong>
+                      <small v-if="originalAmountLabel(charge)">Original: {{ originalAmountLabel(charge) }}</small>
+                    </div>
+                  </td>
                   <td>{{ charge.financingMode }}</td>
                   <td>{{ effectOfFinancing(charge.financingMode) }}</td>
                 </tr>
@@ -129,7 +134,12 @@
                 <td>{{ charge.code }}</td>
                 <td>{{ charge.label }}</td>
                 <td>{{ charge.chargeType }}</td>
-                <td>{{ chargeValue(charge) }}</td>
+                <td>
+                  <div class="money-stack">
+                    <strong>{{ chargeValue(charge) }}</strong>
+                    <small v-if="originalAmountLabel(charge)">Original: {{ originalAmountLabel(charge) }}</small>
+                  </div>
+                </td>
                 <td>{{ charge.rateBase || '---' }}</td>
                 <td>{{ charge.frequency }}</td>
                 <td>{{ charge.fromInstallment }}-{{ charge.toInstallment }}</td>
@@ -487,10 +497,22 @@ function graceLabel(value) {
 
 function chargeValue(charge) {
   if (charge.chargeType === 'FIXED_AMOUNT') {
-    return formatMoney(charge.amount, currency.value)
+    return formatMoney(charge.amount, charge.currency || currency.value)
   }
 
   return formatPercent(charge.ratePercent)
+}
+
+function originalAmountLabel(charge) {
+  if (!charge || charge.originalAmount === null || charge.originalAmount === undefined || !charge.originalCurrency) {
+    return ''
+  }
+  const displayCurrency = charge.currency || currency.value
+  if (String(charge.originalCurrency) === String(displayCurrency)) {
+    return ''
+  }
+
+  return formatMoney(charge.originalAmount, charge.originalCurrency)
 }
 
 function effectOfFinancing(mode) {
@@ -754,6 +776,24 @@ td {
   color: #1d2632;
   font-size: 13px;
   font-weight: 600;
+}
+
+.money-stack {
+  display: grid;
+  gap: 4px;
+}
+
+.money-stack strong {
+  color: #0b1f3a;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.money-stack small {
+  color: #6f7d8f;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .schedule-wrap {
