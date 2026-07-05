@@ -1,10 +1,10 @@
 <template>
   <section class="detail-page">
-    <div v-if="loading" class="state-panel">Loading operation detail...</div>
+    <div v-if="loading" class="state-panel">Cargando detalle de operación...</div>
 
     <div v-else-if="!detail" class="state-panel">
-      <strong>Operation not found.</strong>
-      <button class="action-btn secondary" type="button" @click="goBack">Back to Saved Operations</button>
+      <strong>No se encontró la operación.</strong>
+      <button class="action-btn secondary" type="button" @click="goBack">Volver a operaciones guardadas</button>
     </div>
 
     <div v-else id="operationReport" class="report-shell">
@@ -12,20 +12,20 @@
         <div>
           <nav class="breadcrumb" aria-label="Breadcrumb">
             <span>Portal</span>
-            <span>Operation Detail</span>
+            <span>Detalle de operación</span>
           </nav>
-          <h1>Simulation {{ clientName }} - {{ formattedCreatedAt }}</h1>
+          <h1>Simulación {{ clientName }} - {{ formattedCreatedAt }}</h1>
           <div class="identity-grid">
             <div>
-              <span>Primary Client</span>
+              <span>Cliente principal</span>
               <strong>{{ clientName }}</strong>
             </div>
             <div>
-              <span>Asset Profile</span>
+              <span>Perfil del vehículo</span>
               <strong>{{ vehicleLabel }}</strong>
             </div>
             <div>
-              <span>Status</span>
+              <span>Estado</span>
               <strong class="status-text" :class="statusClass">{{ statusLabel }}</strong>
             </div>
           </div>
@@ -34,19 +34,19 @@
         <div class="header-actions no-print">
           <button class="action-btn secondary" type="button" @click="goBack">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.42-1.41L7.83 13H20v-2z" fill="currentColor"/></svg>
-            Back
+            Volver
           </button>
           <button class="action-btn secondary" type="button" @click="recalculate">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A7.95 7.95 0 0012 4V1L7 6l5 5V6a6 6 0 11-5.65 4H4.26A8 8 0 1017.65 6.35z" fill="currentColor"/></svg>
-            Recalculate
+            Recalcular
           </button>
           <button class="action-btn secondary" type="button" @click="exportPdf">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" fill="currentColor"/></svg>
-            Export PDF
+            Exportar PDF
           </button>
           <button class="action-btn primary" type="button" disabled>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V7l-4-4zM12 19a3 3 0 110-6 3 3 0 010 6zM6 8V5h9v3H6z" fill="currentColor"/></svg>
-            Saved Operation
+            Operación guardada
           </button>
         </div>
       </header>
@@ -86,7 +86,7 @@
                   <td colspan="5">No hay cargos iniciales.</td>
                 </tr>
                 <tr v-for="charge in initialChargeRows" :key="charge.code">
-                  <td>{{ charge.code }}</td>
+                  <td>{{ formatChargeCodeLabel(charge.code) }}</td>
                   <td>{{ charge.label }}</td>
                   <td>
                     <div class="money-stack">
@@ -94,7 +94,7 @@
                       <small v-if="originalAmountLabel(charge)">Original: {{ originalAmountLabel(charge) }}</small>
                     </div>
                   </td>
-                  <td>{{ charge.financingMode }}</td>
+                  <td>{{ formatFinancingModeLabel(charge.financingMode) }}</td>
                   <td>{{ effectOfFinancing(charge.financingMode) }}</td>
                 </tr>
               </tbody>
@@ -131,18 +131,18 @@
                 <td colspan="7">No hay cargos periódicos.</td>
               </tr>
               <tr v-for="charge in periodicChargeRows" :key="charge.code">
-                <td>{{ charge.code }}</td>
+                <td>{{ formatChargeCodeLabel(charge.code) }}</td>
                 <td>{{ charge.label }}</td>
-                <td>{{ charge.chargeType }}</td>
+                <td>{{ formatChargeTypeLabel(charge.chargeType) }}</td>
                 <td>
                   <div class="money-stack">
                     <strong>{{ chargeValue(charge) }}</strong>
                     <small v-if="originalAmountLabel(charge)">Original: {{ originalAmountLabel(charge) }}</small>
                   </div>
                 </td>
-                <td>{{ charge.rateBase || '---' }}</td>
-                <td>{{ charge.frequency }}</td>
-                <td>{{ charge.fromInstallment }}-{{ charge.toInstallment }}</td>
+                <td>{{ formatChargeBaseLabel(charge.rateBase) }}</td>
+                <td>{{ formatFrequencyLabel(charge.frequency) }}</td>
+                <td>{{ formatInstallmentRangeLabel(charge.fromInstallment, charge.toInstallment) }}</td>
               </tr>
             </tbody>
           </table>
@@ -151,30 +151,30 @@
 
       <section class="table-card">
         <div class="section-title-row">
-          <h2>Amortization Schedule</h2>
-          <span>{{ schedule.length }} installments</span>
+          <h2>Cronograma de pagos</h2>
+          <span>{{ schedule.length }} cuotas</span>
         </div>
         <div class="table-wrap schedule-wrap">
           <table>
             <thead>
               <tr>
-                <th>Inst. #</th>
-                <th>Date</th>
-                <th>Grace</th>
-                <th>Opening Balance</th>
-                <th>Interest</th>
-                <th>Financial Installment</th>
-                <th>Insurance</th>
-                <th>Charges</th>
+                <th>N.? cuota</th>
+                <th>Fecha</th>
+                <th>Gracia</th>
+                <th>Saldo inicial</th>
+                <th>Interés</th>
+                <th>Cuota financiera</th>
+                <th>Seguros</th>
+                <th>Cargos</th>
                 <th>Total</th>
-                <th>Closing Balance</th>
+                <th>Saldo final</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="row in schedule" :key="row.installmentNumber">
                 <td>{{ padInstallment(row.installmentNumber) }}</td>
                 <td>{{ formatDate(row.dueDate) }}</td>
-                <td>{{ graceLabel(row.graceTypeApplied) }}</td>
+                <td>{{ formatGraceTypeLabel(row.graceTypeApplied) }}</td>
                 <td>{{ formatMoney(row.openingBalance) }}</td>
                 <td>{{ formatMoney(row.interest) }}</td>
                 <td>{{ formatMoney(row.baseInstallment) }}</td>
@@ -196,6 +196,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { loanService } from '../services/loan.service.js'
 import { toastService } from '../../shared/services/toast.service.js'
+import { formatChargeBaseLabel, formatChargeCodeLabel, formatChargeTypeLabel, formatFrequencyLabel, formatGraceTypeLabel, formatInstallmentRangeLabel, formatFinancingModeLabel, formatOperationStatusLabel, formatBooleanLabel } from '../../shared/utils/loan-labels.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -216,16 +217,16 @@ const currency = computed(() =>
 const indicator = computed(() => detail.value?.indicator || {})
 const charges = computed(() => detail.value?.charges || {})
 
-const clientName = computed(() => detail.value?.clientSnapshotName || 'Unnamed Client')
-const vehicleLabel = computed(() => detail.value?.vehicleSnapshotLabel || 'Unnamed Vehicle')
-const statusLabel = computed(() => titleCase(detail.value?.status || 'Saved'))
+const clientName = computed(() => detail.value?.clientSnapshotName || 'Cliente sin nombre')
+const vehicleLabel = computed(() => detail.value?.vehicleSnapshotLabel || 'Vehículo sin nombre')
+const statusLabel = computed(() => formatOperationStatusLabel(detail.value?.status || 'SAVED'))
 const statusClass = computed(() => (detail.value?.status || 'SAVED').toLowerCase())
 
 const formattedCreatedAt = computed(() => {
   const value = detail.value?.createdAt || detail.value?.calculatedAt
-  if (!value) return 'Not dated'
+  if (!value) return 'Sin fecha'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Not dated'
+  if (Number.isNaN(date.getTime())) return 'Sin fecha'
 
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
@@ -238,39 +239,39 @@ const formattedCreatedAt = computed(() => {
 
 const topMetrics = computed(() => [
   {
-    label: 'Vehicle Price',
+    label: 'Precio del vehículo',
     value: formatMoney(detail.value?.vehiclePrice ?? detail.value?.vehicleSnapshotPrice)
   },
   {
-    label: 'Down Payment',
+    label: 'Cuota inicial',
     value: formatMoney(detail.value?.downPaymentAmount),
-    note: detail.value?.downPaymentPercent != null ? `${formatPercent(detail.value.downPaymentPercent)} of vehicle price` : ''
+    note: detail.value?.downPaymentPercent != null ? `${formatPercent(detail.value.downPaymentPercent)} del precio del vehículo` : ''
   },
   {
-    label: 'Initial Charges Financed',
-    value: formatMoney(detail.value?.initialChargesFinanced ?? indicator.value.initialChargesFinanced)
+    label: 'Cargos iniciales financiados',
+    value: formatMoney(detail.value?.initialCargosFinanced ?? indicator.value.initialCargosFinanced)
   },
   {
-    label: 'Principal Financed',
+    label: 'Principal financiado',
     value: formatMoney(indicator.value.financedAmount)
   },
   {
-    label: 'Balloon Payment',
+    label: 'Cuota balloon',
     value: formatMoney(detail.value?.calculatedBalloonAmount ?? indicator.value.balloonAmount ?? detail.value?.balloonAmount),
-    note: detail.value?.balloonPercent != null ? `${formatPercent(detail.value.balloonPercent)} of vehicle price` : ''
+    note: detail.value?.balloonPercent != null ? `${formatPercent(detail.value.balloonPercent)} del precio del vehículo` : ''
   },
   {
-    label: 'Base Installment',
+    label: 'Cuota financiera base',
     value: formatMoney(indicator.value.baseInstallment)
   },
   {
-    label: 'Estimated Monthly Payment',
+    label: 'Cuota mensual estimada',
     value: formatMoney(firstMonthlyPayment.value)
   },
   {
-    label: 'Total Payable',
+    label: 'Total a pagar',
     value: formatMoney(indicator.value.totalPayable),
-    note: `Residual value at month ${detail.value?.termMonths || schedule.value.length || '--'}`
+    note: `Valor residual en el mes ${detail.value?.termMonths || schedule.value.length || '--'}`
   }
 ])
 
@@ -280,7 +281,7 @@ const indicatorMetrics = computed(() => [
   { label: 'TIR Anual', value: formatPercent(indicator.value.irrAnnual), note: 'Nominal' },
   { label: 'TCEA', value: formatPercent(indicator.value.effectiveAnnualCost) },
   { label: 'COK', value: formatPercent(detail.value?.discountRate) },
-  { label: 'TIR Converged', value: indicator.value.irrConverged ? 'Yes' : 'No' }
+  { label: 'TIR calculada', value: indicator.value.irrConverged ? 'Sí' : 'No' }
 ])
 
 const firstMonthlyPayment = computed(() => {
@@ -289,36 +290,36 @@ const firstMonthlyPayment = computed(() => {
 })
 
 const initialChargeRows = computed(() => {
-  if (Array.isArray(detail.value?.initialCharges) && detail.value.initialCharges.length > 0) {
-    return detail.value.initialCharges
+  if (Array.isArray(detail.value?.initialCargos) && detail.value.initialCargos.length > 0) {
+    return detail.value.initialCargos
   }
 
   const rows = [
     {
       code: 'INITIAL_FINANCED',
       label: 'Cargos iniciales financiados',
-      amount: detail.value?.initialChargesFinanced ?? indicator.value.initialChargesFinanced,
+      amount: detail.value?.initialCargosFinanced ?? indicator.value.initialCargosFinanced,
       financingMode: 'FINANCED'
     },
     {
       code: 'PAID_UPFRONT',
       label: 'Cargos iniciales pagados al inicio',
-      amount: detail.value?.initialChargesPaidUpfront ?? indicator.value.initialChargesPaidUpfront,
+      amount: detail.value?.initialCargosPaidUpfront ?? indicator.value.initialCargosPaidUpfront,
       financingMode: 'PAID_UPFRONT'
     },
     {
       code: 'WITHHELD',
       label: 'Cargos iniciales retenidos',
-      amount: detail.value?.initialChargesWithheld ?? indicator.value.initialChargesWithheld,
+      amount: detail.value?.initialCargosWithheld ?? indicator.value.initialCargosWithheld,
       financingMode: 'WITHHELD'
     }
   ]
 
-  if (charges.value.initialCharges != null) {
+  if (charges.value.initialCargos != null) {
     rows.push({
       code: 'INITIAL_TOTAL',
       label: 'Total de cargos iniciales',
-      amount: charges.value.initialCharges,
+      amount: charges.value.initialCargos,
       financingMode: 'FINANCED'
     })
   }
@@ -327,15 +328,15 @@ const initialChargeRows = computed(() => {
 })
 
 const periodicChargeRows = computed(() => {
-  if (Array.isArray(detail.value?.periodicCharges) && detail.value.periodicCharges.length > 0) {
-    return detail.value.periodicCharges
+  if (Array.isArray(detail.value?.periodicCargos) && detail.value.periodicCargos.length > 0) {
+    return detail.value.periodicCargos
   }
 
   const term = detail.value?.termMonths || schedule.value.length || '--'
   const rows = [
     {
       code: 'POSTAGE',
-      label: 'Portes',
+      label: 'Porte',
       chargeType: 'FIXED_AMOUNT',
       amount: charges.value.postageFee,
       currency: currency.value,
@@ -387,7 +388,7 @@ const periodicChargeRows = computed(() => {
       chargeType: 'RATE',
       amount: null,
       currency: null,
-      ratePercent: charges.value.vehicleInsuranceRate,
+      ratePercent: charges.value.vehicleSegurosRate,
       rateBase: 'VEHICLE_PRICE',
       frequency: 'ANNUAL_PRORATED_MONTHLY',
       fromInstallment: 1,
@@ -411,7 +412,7 @@ const payoffSummary = computed(() => [
 
 async function loadDetail() {
   if (!operationId.value) {
-    toastService.warning('Operation ID is required.')
+    toastService.warning('El ID de la operación es obligatorio.')
     return
   }
 
@@ -444,7 +445,7 @@ function recalculate() {
 }
 
 function exportPdf() {
-  document.title = `CapitalCruise Operation ${operationId.value}`
+  document.title = `Capital Cruise Operación ${operationId.value}`
   window.print()
 }
 
@@ -489,10 +490,10 @@ function padInstallment(value) {
 function graceLabel(value) {
   const map = {
     TOTAL: 'Total',
-    PARTIAL: 'Partial',
-    NONE: 'None'
+    PARTIAL: 'Gracia parcial',
+    NONE: 'Sin gracia'
   }
-  return map[value] || titleCase(value || 'None')
+  return map[value] || formatGraceTypeLabel(value)
 }
 
 function chargeValue(charge) {
@@ -517,8 +518,8 @@ function originalAmountLabel(charge) {
 
 function effectOfFinancing(mode) {
   if (mode === 'FINANCED') return 'Se suma al principal'
-  if (mode === 'PAID_UPFRONT') return 'Se paga al inicio'
-  if (mode === 'WITHHELD') return 'Se retiene del desembolso'
+  if (mode === 'PAID_UPFRONT') return 'Pagado al contado'
+  if (mode === 'WITHHELD') return 'Retenido del desembolso'
   return ''
 }
 

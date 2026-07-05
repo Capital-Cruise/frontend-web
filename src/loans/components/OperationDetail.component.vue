@@ -32,13 +32,25 @@
       <div class="mini-table" v-else>
         <table>
           <thead>
-            <tr><th>#</th><th>Fecha</th><th>Gracia</th><th>Saldo inicial</th><th>Interés</th><th>Cuota financiera</th><th>Seguros</th><th>Cargos</th><th>Balloon</th><th>Total</th><th>Saldo final</th></tr>
+            <tr>
+              <th>#</th>
+              <th>Fecha</th>
+              <th>Gracia</th>
+              <th>Saldo inicial</th>
+              <th>Interés</th>
+              <th>Cuota financiera</th>
+              <th>Seguros</th>
+              <th>Cargos</th>
+              <th>Balloon</th>
+              <th>Total</th>
+              <th>Saldo final</th>
+            </tr>
           </thead>
           <tbody>
             <tr v-for="(s, idx) in schedule.slice(0, 60)" :key="idx">
               <td>{{ s.installmentNumber }}</td>
               <td>{{ s.dueDate }}</td>
-              <td>{{ s.graceTypeApplied }}</td>
+              <td>{{ formatGraceTypeLabel(s.graceTypeApplied) }}</td>
               <td>{{ formatMoney(s.openingBalance) }}</td>
               <td>{{ formatMoney(s.interest) }}</td>
               <td>{{ formatMoney(s.baseInstallment) }}</td>
@@ -66,6 +78,7 @@ import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { loanService } from '../services/loan.service.js'
 import { toastService } from '../../shared/services/toast.service.js'
+import { formatGraceTypeLabel } from '../../shared/utils/loan-labels.js'
 
 const route = useRoute()
 const operationId = ref(route.params.id || '')
@@ -220,7 +233,8 @@ input:focus {
   width: 100%;
   border-collapse: collapse;
 }
-.mini-table th, .mini-table td {
+.mini-table th,
+.mini-table td {
   padding: 12px 10px;
   border-bottom: 1px solid #e3e8ef;
   text-align: left;
@@ -235,31 +249,15 @@ input:focus {
   letter-spacing: 0.08em;
 }
 .debug {
-  background: #101a2a;
-  color: #d7e5ff;
+  margin: 0;
+  background: #f7f9fc;
   border-radius: 10px;
   padding: 16px;
-  max-height: 420px;
   overflow: auto;
-  font-size: 12px;
-  white-space: pre-wrap;
-  word-break: break-word;
 }
 .hint {
   font-size: 13px;
   color: #6f7d8f;
   margin-top: 8px;
-}
-@media (max-width: 760px) {
-  .cards-4 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .section-head {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .inline-form input {
-    width: 100%;
-  }
 }
 </style>

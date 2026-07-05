@@ -4,65 +4,65 @@
       <div>
         <nav class="breadcrumb" aria-label="Breadcrumb">
           <span>Portal</span>
-          <span>Operation History</span>
+          <span>Historial de operaciones</span>
         </nav>
-        <h1>Operation History</h1>
-        <p>Review and audit all processed financial simulations for Capital Cruise.</p>
+        <h1>Historial de operaciones</h1>
+        <p>Revisa y audita todas las simulaciones financieras procesadas en Capital Cruise.</p>
       </div>
 
       <div class="header-actions">
         <button class="action-btn secondary" type="button" :disabled="operations.length === 0" @click="exportCsv">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20h14v-2H5v2zm7-18v10.17l3.59-3.58L17 10l-6 6-6-6 1.41-1.41L10 12.17V2h2z" fill="currentColor"/></svg>
-          Export CSV
+          Exportar CSV
         </button>
         <button class="action-btn primary" type="button" @click="goToNewSimulation">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v14h-2V5zm-6 6h14v2H5v-2z" fill="currentColor"/></svg>
-          New Simulation
+          Nueva simulación
         </button>
       </div>
     </header>
 
-    <section class="filters-panel" aria-label="Operation filters">
+    <section class="filters-panel" aria-label="Filtros de operaciones">
       <label>
-        <span>Client Name</span>
+        <span>Nombre del cliente</span>
         <input
           v-model="filters.client"
           type="search"
-          placeholder="Filter by client..."
+          placeholder="Filtrar por cliente..."
           @input="applyClientFilter"
         />
       </label>
 
       <label>
-        <span>Currency</span>
+        <span>Moneda</span>
         <select v-model="filters.currency" @change="loadOperations(0)">
-          <option value="">All Currencies</option>
-          <option value="USD">USD</option>
-          <option value="PEN">PEN</option>
+          <option value="">Todas las monedas</option>
+          <option value="USD">Dólares</option>
+          <option value="PEN">Soles</option>
         </select>
       </label>
 
       <label>
-        <span>Status</span>
+        <span>Estado</span>
         <select v-model="filters.status" @change="loadOperations(0)">
-          <option value="">Any Status</option>
-          <option value="SAVED">Saved</option>
-          <option value="CALCULATED">Calculated</option>
-          <option value="DRAFT">Draft</option>
+          <option value="">Cualquier estado</option>
+          <option value="SAVED">Guardada</option>
+          <option value="CALCULATED">Calculada</option>
+          <option value="DRAFT">Borrador</option>
         </select>
       </label>
 
       <button class="clear-btn" type="button" :disabled="!hasFilters" @click="clearFilters">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"/></svg>
-        Clear All Filters
+        Limpiar filtros
       </button>
     </section>
 
-    <div v-if="loading" class="state-panel">Loading saved operations...</div>
+    <div v-if="loading" class="state-panel">Cargando operaciones guardadas...</div>
 
     <div v-else-if="visibleOperations.length === 0" class="state-panel">
-      <strong>No saved operations found.</strong>
-      <span>Try changing the filters or create a new simulation.</span>
+      <strong>No se encontraron operaciones guardadas.</strong>
+      <span>Intenta cambiar los filtros o crear una nueva simulación.</span>
     </div>
 
     <div v-else class="operation-sections">
@@ -77,10 +77,10 @@
             @click="openOperation(operation.identifier)"
           >
             <div class="card-main">
-              <span class="eyebrow">Asset Profile</span>
+              <span class="eyebrow">Perfil del vehículo</span>
               <strong>{{ operation.title }}</strong>
 
-              <span class="eyebrow client-label">Primary Client</span>
+              <span class="eyebrow client-label">Cliente principal</span>
               <p>{{ operation.displayClient }}</p>
             </div>
 
@@ -97,7 +97,7 @@
                 <button
                   class="arrow-icon"
                   type="button"
-                  title="Open operation detail"
+                  title="Ver detalle de operación"
                   @click.stop="openOperation(operation.identifier)"
                 >
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.29 6.71a1 1 0 011.42 0L16 12l-5.29 5.29a1 1 0 01-1.42-1.42L13.17 12 9.29 8.12a1 1 0 010-1.41z" fill="currentColor"/></svg>
@@ -110,11 +110,11 @@
 
       <footer v-if="totalPages > 1" class="pagination">
         <button class="page-btn" type="button" :disabled="page === 0" @click="loadOperations(page - 1)">
-          Previous
+          Anterior
         </button>
-        <span>Page {{ page + 1 }} of {{ totalPages }}</span>
+        <span>Página {{ page + 1 }} de {{ totalPages }}</span>
         <button class="page-btn" type="button" :disabled="page + 1 >= totalPages" @click="loadOperations(page + 1)">
-          Next
+          Siguiente
         </button>
       </footer>
     </div>
@@ -126,6 +126,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { loanService } from '../services/loan.service.js'
 import { toastService } from '../../shared/services/toast.service.js'
+import { formatOperationStatusLabel } from '../../shared/utils/loan-labels.js'
 
 const router = useRouter()
 
@@ -167,7 +168,7 @@ const groupedOperations = computed(() => {
     if (!groups.has(key)) {
       groups.set(key, {
         key,
-        label: date ? formatGroupLabel(date) : 'Undated',
+        label: date ? formatGroupLabel(date) : 'Sin fecha',
         items: []
       })
     }
@@ -226,7 +227,7 @@ function openOperation(operationId) {
 
 function exportCsv() {
   const rows = [
-    ['ID', 'Client', 'Vehicle', 'Currency', 'Status', 'Term Months', 'Created At'],
+    ['ID', 'Cliente', 'Vehículo', 'Moneda', 'Estado', 'Plazo en meses', 'Creado el'],
     ...visibleOperations.value.map((operation) => [
       operation.identifier,
       operation.displayClient,
@@ -263,8 +264,8 @@ function formatGroupLabel(date) {
     year: 'numeric'
   }).format(date)
 
-  if (dateKey === today.toDateString()) return `Today - ${formatted}`
-  if (dateKey === yesterday.toDateString()) return `Yesterday - ${formatted}`
+  if (dateKey === today.toDateString()) return `Hoy - ${formatted}`
+  if (dateKey === yesterday.toDateString()) return `Ayer - ${formatted}`
   return formatted
 }
 
@@ -280,12 +281,7 @@ function formatTime(value) {
 }
 
 function statusLabel(status) {
-  const map = {
-    SAVED: 'Saved',
-    CALCULATED: 'Calculated',
-    DRAFT: 'Draft'
-  }
-  return map[status] || status || 'Pending'
+  return formatOperationStatusLabel(status)
 }
 
 function statusClass(status) {

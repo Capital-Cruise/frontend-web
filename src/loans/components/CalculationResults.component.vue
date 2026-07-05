@@ -26,20 +26,27 @@
         <div class="mini-table" v-else>
           <table>
             <thead>
-              <tr><th>Código</th><th>Nombre</th><th>Monto</th><th>Modo</th><th>Efecto</th></tr>
+              <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Monto</th>
+                <th>Modo</th>
+                <th>Efecto</th>
+              </tr>
             </thead>
             <tbody>
-              <tr v-for="(c, i) in initialCharges" :key="i">
-                <td>{{ c.code }}</td>
-                <td>{{ c.label }}</td>
-                <td>{{ formatMoney(c.amount, c.currency) }}</td>
-                <td>{{ c.financingMode }}</td>
-                <td>{{ effectOfFinancing(c.financingMode) }}</td>
+              <tr v-for="(charge, i) in initialCharges" :key="i">
+                <td>{{ formatChargeCodeLabel(charge.code) }}</td>
+                <td>{{ charge.label }}</td>
+                <td>{{ formatMoney(charge.amount, charge.currency) }}</td>
+                <td>{{ formatFinancingModeLabel(charge.financingMode) }}</td>
+                <td>{{ effectOfFinancing(charge.financingMode) }}</td>
               </tr>
             </tbody>
           </table>
         </div>
       </section>
+
       <section class="card">
         <h2>Totales financieros</h2>
         <div class="list">
@@ -57,17 +64,25 @@
       <div class="mini-table" v-else>
         <table>
           <thead>
-            <tr><th>Código</th><th>Nombre</th><th>Tipo</th><th>Valor</th><th>Base</th><th>Frecuencia</th><th>Rango</th></tr>
+            <tr>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Tipo</th>
+              <th>Valor</th>
+              <th>Base</th>
+              <th>Frecuencia</th>
+              <th>Rango</th>
+            </tr>
           </thead>
           <tbody>
-            <tr v-for="(c, i) in periodicCharges" :key="i">
-              <td>{{ c.code }}</td>
-              <td>{{ c.label }}</td>
-              <td>{{ c.chargeType }}</td>
-              <td>{{ c.chargeType === 'FIXED_AMOUNT' ? formatMoney(c.amount, c.currency) : formatPercent(c.ratePercent) }}</td>
-              <td>{{ c.rateBase || '---' }}</td>
-              <td>{{ c.frequency }}</td>
-              <td>{{ c.fromInstallment }}-{{ c.toInstallment }}</td>
+            <tr v-for="(charge, i) in periodicCharges" :key="i">
+              <td>{{ formatChargeCodeLabel(charge.code) }}</td>
+              <td>{{ charge.label }}</td>
+              <td>{{ formatChargeTypeLabel(charge.chargeType) }}</td>
+              <td>{{ charge.chargeType === 'FIXED_AMOUNT' ? formatMoney(charge.amount, charge.currency) : formatPercent(charge.ratePercent) }}</td>
+              <td>{{ formatChargeBaseLabel(charge.rateBase) }}</td>
+              <td>{{ formatFrequencyLabel(charge.frequency) }}</td>
+              <td>{{ formatInstallmentRangeLabel(charge.fromInstallment, charge.toInstallment) }}</td>
             </tr>
           </tbody>
         </table>
@@ -80,21 +95,33 @@
       <div class="mini-table" v-else>
         <table>
           <thead>
-            <tr><th>#</th><th>Fecha</th><th>Gracia</th><th>Saldo inicial</th><th>Interés</th><th>Cuota financiera</th><th>Seguros</th><th>Cargos</th><th>Balloon</th><th>Total</th><th>Saldo final</th></tr>
+            <tr>
+              <th>N.º</th>
+              <th>Fecha</th>
+              <th>Gracia</th>
+              <th>Saldo inicial</th>
+              <th>Interés</th>
+              <th>Cuota financiera</th>
+              <th>Seguros</th>
+              <th>Cargos</th>
+              <th>Balloon</th>
+              <th>Total</th>
+              <th>Saldo final</th>
+            </tr>
           </thead>
           <tbody>
-            <tr v-for="(s, idx) in schedule.slice(0, 60)" :key="idx">
-              <td>{{ s.installmentNumber }}</td>
-              <td>{{ s.dueDate }}</td>
-              <td>{{ s.graceTypeApplied }}</td>
-              <td>{{ formatMoney(s.openingBalance) }}</td>
-              <td>{{ formatMoney(s.interest) }}</td>
-              <td>{{ formatMoney(s.baseInstallment) }}</td>
-              <td>{{ formatMoney(s.insuranceAmount) }}</td>
-              <td>{{ formatMoney(s.additionalChargeAmount) }}</td>
-              <td>{{ formatMoney(s.balloonPortion) }}</td>
-              <td>{{ formatMoney(s.totalInstallment) }}</td>
-              <td>{{ formatMoney(s.closingBalance) }}</td>
+            <tr v-for="(row, idx) in schedule.slice(0, 60)" :key="idx">
+              <td>{{ row.installmentNumber }}</td>
+              <td>{{ row.dueDate }}</td>
+              <td>{{ formatGraceTypeLabel(row.graceTypeApplied) }}</td>
+              <td>{{ formatMoney(row.openingBalance) }}</td>
+              <td>{{ formatMoney(row.interest) }}</td>
+              <td>{{ formatMoney(row.baseInstallment) }}</td>
+              <td>{{ formatMoney(row.insuranceAmount) }}</td>
+              <td>{{ formatMoney(row.additionalChargeAmount) }}</td>
+              <td>{{ formatMoney(row.balloonPortion) }}</td>
+              <td>{{ formatMoney(row.totalInstallment) }}</td>
+              <td>{{ formatMoney(row.closingBalance) }}</td>
             </tr>
           </tbody>
         </table>
@@ -106,6 +133,15 @@
 
 <script setup>
 import { computed } from 'vue'
+import {
+  formatChargeBaseLabel,
+  formatChargeCodeLabel,
+  formatChargeTypeLabel,
+  formatFinancingModeLabel,
+  formatFrequencyLabel,
+  formatGraceTypeLabel,
+  formatInstallmentRangeLabel
+} from '../../shared/utils/loan-labels.js'
 
 const props = defineProps({
   calculation: { type: Object, default: null },
@@ -165,9 +201,9 @@ function formatPercent(value) {
 
 function effectOfFinancing(mode) {
   if (mode === 'FINANCED') return 'Se suma al principal'
-  if (mode === 'PAID_UPFRONT') return 'Se paga al inicio'
-  if (mode === 'WITHHELD') return 'Se retiene del desembolso'
-  return ''
+  if (mode === 'PAID_UPFRONT') return 'Pagado al contado'
+  if (mode === 'WITHHELD') return 'Retenido del desembolso'
+  return 'Sin efecto financiero directo'
 }
 </script>
 
@@ -257,7 +293,8 @@ function effectOfFinancing(mode) {
   width: 100%;
   border-collapse: collapse;
 }
-.mini-table th, .mini-table td {
+.mini-table th,
+.mini-table td {
   padding: 12px 10px;
   border-bottom: 1px solid #e3e8ef;
   text-align: left;

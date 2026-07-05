@@ -22,7 +22,7 @@
           <div class="two-cols">            <label>Moneda de la operación
               <div class="segmented-control">
                 <button
-                  v-for="currency in ['USD', 'PEN']"
+                  v-for="currency in currencyOptions"
                   :key="currency"
                   type="button"
                   :class="{ active: loan.operationCurrency === currency }"
@@ -99,7 +99,7 @@
           </div>
         </section>
 
-        <!-- Cuota balloon & Periodo de gracia -->
+        <!-- Cuota balloon y periodo de gracia -->
         <div class="two-card-row">
           <section class="card">
             <h2>Cuota balloon</h2>
@@ -158,10 +158,10 @@
               </thead>
               <tbody>
               <tr v-for="(charge, index) in initialCharges" :key="index">
-                <td>{{ charge.code }}</td>
+                <td>{{ formatChargeCodeLabel(charge.code) }}</td>
                 <td>{{ charge.label }}</td>
                 <td>{{ formatMoney(charge.amount, charge.currency) }}</td>
-                <td>{{ charge.financingMode }}</td>
+                <td>{{ formatFinancingModeLabel(charge.financingMode) }}</td>
                 <td>
                   <button type="button" class="secondary small" @click="editInitialCharge(index)">Editar</button>
                   <button type="button" class="danger small" @click="removeInitialCharge(index)">Eliminar</button>
@@ -181,13 +181,13 @@
               </thead>
               <tbody>
               <tr v-for="(charge, index) in periodicCharges" :key="index">
-                <td>{{ charge.code }}</td>
+                <td>{{ formatChargeCodeLabel(charge.code) }}</td>
                 <td>{{ charge.label }}</td>
-                <td>{{ charge.chargeType }}</td>
+                <td>{{ formatChargeTypeLabel(charge.chargeType) }}</td>
                 <td>{{ charge.chargeType === 'FIXED_AMOUNT' ? formatMoney(charge.amount, charge.currency) : formatPercent(charge.ratePercent) }}</td>
-                <td>{{ charge.rateBase || '---' }}</td>
-                <td>{{ charge.frequency }}</td>
-                <td>{{ charge.fromInstallment }}-{{ charge.toInstallment }}</td>
+                <td>{{ formatChargeBaseLabel(charge.rateBase) }}</td>
+                <td>{{ formatFrequencyLabel(charge.frequency) }}</td>
+                <td>{{ formatInstallmentRangeLabel(charge.fromInstallment, charge.toInstallment) }}</td>
                 <td>
                   <button type="button" class="secondary small" @click="editPeriodicCharge(index)">Editar</button>
                   <button type="button" class="danger small" @click="removePeriodicCharge(index)">Eliminar</button>
@@ -251,13 +251,9 @@
       <form class="dialog-form" @submit.prevent="saveInitialCharge">        <h2>Cargo inicial</h2>
         <div class="two-cols">          <label>Código del cargo
             <select v-model="editingInitialCharge.code">
-              <option>NOTARY_FEES</option>
-              <option>REGISTRATION_FEES</option>
-              <option>STUDY_COMMISSION</option>
-              <option>APPRAISAL</option>
-              <option>GPS</option>
-              <option>SOAT</option>
-              <option>OTHER</option>
+              <option v-for="code in initialChargeCodes" :key="code" :value="code">
+                {{ formatChargeCodeLabel(code) }}
+              </option>
             </select>
           </label>
           <label>Nombre
@@ -268,15 +264,16 @@
           </label>
           <label>Moneda
             <select v-model="editingInitialCharge.currency">
-              <option>USD</option>
-              <option>PEN</option>
+              <option v-for="currency in currencyOptions" :key="currency" :value="currency">
+                {{ formatCurrencyLabel(currency) }}
+              </option>
             </select>
           </label>
           <label>Modo de financiamiento
             <select v-model="editingInitialCharge.financingMode">
-              <option>FINANCED</option>
-              <option>PAID_UPFRONT</option>
-              <option>WITHHELD</option>
+              <option v-for="mode in financingModeOptions" :key="mode" :value="mode">
+                {{ formatFinancingModeLabel(mode) }}
+              </option>
             </select>
           </label>
           <label class="check">
@@ -293,18 +290,16 @@
       <form class="dialog-form" @submit.prevent="savePeriodicCharge">        <h2>Cargo periódico</h2>
         <div class="two-cols">          <label>Código del cargo
             <select v-model="editingPeriodicCharge.code">
-              <option>POSTAGE</option>
-              <option>ADMIN_FEE</option>
-              <option>LIFE_INSURANCE</option>
-              <option>VEHICLE_INSURANCE</option>
-              <option>MONTHLY_COMMISSION</option>
-              <option>OTHER</option>
+              <option v-for="code in periodicChargeCodes" :key="code" :value="code">
+                {{ formatChargeCodeLabel(code) }}
+              </option>
             </select>
           </label>
           <label>Tipo de cargo
             <select v-model="editingPeriodicCharge.chargeType">
-              <option>FIXED_AMOUNT</option>
-              <option>RATE</option>
+              <option v-for="type in chargeTypeOptions" :key="type" :value="type">
+                {{ formatChargeTypeLabel(type) }}
+              </option>
             </select>
           </label>
           <label>Nombre
@@ -316,8 +311,9 @@
             </label>
             <label>Moneda
               <select v-model="editingPeriodicCharge.currency">
-                <option>USD</option>
-                <option>PEN</option>
+                <option v-for="currency in currencyOptions" :key="currency" :value="currency">
+                  {{ formatCurrencyLabel(currency) }}
+                </option>
               </select>
             </label>
           </template>
@@ -327,24 +323,23 @@
             </label>
             <label>Base de la tasa
               <select v-model="editingPeriodicCharge.rateBase">
-                <option>VEHICLE_PRICE</option>
-                <option>PRINCIPAL_FINANCED</option>
-                <option>OPENING_BALANCE</option>
-                <option>REMAINING_BALANCE</option>
-                <option>BALLOON</option>
+                <option v-for="base in chargeBaseOptions" :key="base" :value="base">
+                  {{ formatChargeBaseLabel(base) }}
+                </option>
               </select>
             </label>
           </template>
           <label>Frecuencia
             <select v-model="editingPeriodicCharge.frequency">
-              <option value="MONTHLY">Mensual</option>
-              <option>ANNUAL_PRORATED_MONTHLY</option>
+              <option v-for="frequency in frequencyOptions" :key="frequency" :value="frequency">
+                {{ formatFrequencyLabel(frequency) }}
+              </option>
             </select>
           </label>
           <label>Aplica durante gracia
             <select v-model="editingPeriodicCharge.appliesDuringGrace">
-              <option :value="true">true</option>
-              <option :value="false">false</option>
+              <option :value="true">{{ formatBooleanLabel(true) }}</option>
+              <option :value="false">{{ formatBooleanLabel(false) }}</option>
             </select>
           </label>
           <label>Desde la cuota
@@ -367,6 +362,28 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { loanService } from '../services/loan.service.js'
 import { toastService } from '../../shared/services/toast.service.js'
+import {
+  CHARGE_BASES,
+  CHARGE_TYPES,
+  CURRENCIES,
+  FINANCING_MODES,
+  FREQUENCIES,
+  GRACE_TYPES,
+  INITIAL_CHARGE_CODES,
+  PERIODIC_CHARGE_CODES,
+  RATE_TYPES,
+  formatBooleanLabel,
+  formatChargeBaseLabel,
+  formatChargeCodeLabel,
+  formatChargeEffectLabel,
+  formatChargeTypeLabel,
+  formatCurrencyLabel,
+  formatFinancingModeLabel,
+  formatFrequencyLabel,
+  formatGraceTypeLabel,
+  formatInstallmentRangeLabel,
+  formatRateTypeLabel
+} from '../../shared/utils/loan-labels.js'
 
 const props = defineProps({
   clients: { type: Array, default: () => [] },
@@ -380,6 +397,16 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['calculate', 'save', 'clear-result'])
+
+const currencyOptions = CURRENCIES
+const initialChargeCodes = INITIAL_CHARGE_CODES
+const periodicChargeCodes = PERIODIC_CHARGE_CODES
+const financingModeOptions = FINANCING_MODES
+const chargeTypeOptions = CHARGE_TYPES
+const chargeBaseOptions = CHARGE_BASES
+const frequencyOptions = FREQUENCIES
+const rateTypeOptions = RATE_TYPES
+const graceTypeOptions = GRACE_TYPES
 
 // ===== Form State =====
 const selectedClientId = ref('')
@@ -944,7 +971,7 @@ onMounted(() => {
 }
 .layout-quote {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) 360px;
   gap: 32px;
   align-items: start;
   max-width: none;
@@ -1153,6 +1180,7 @@ input:focus, select:focus {
   gap: 14px;
   position: sticky;
   top: 24px;
+  width: 100%;
 }
 .side-card {
   background: #ffffff;
