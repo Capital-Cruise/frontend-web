@@ -198,6 +198,7 @@ import { loanService } from '../services/loan.service.js'
 import { toastService } from '../../shared/services/toast.service.js'
 import { normalizeOperationDetail } from '../utils/operation-detail.util.js'
 import {
+  formatBooleanLabel,
   formatChargeBaseLabel,
   formatChargeCodeLabel,
   formatChargeEffectLabel,

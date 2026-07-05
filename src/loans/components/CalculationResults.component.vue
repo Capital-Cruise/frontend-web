@@ -6,8 +6,10 @@
         <p id="resultSubtitle">{{ subtitle }}</p>
       </div>
       <div class="button-row">
-        <button class="secondary" @click="$emit('back')">Volver al formulario</button>
-        <button class="primary" @click="$emit('save')">Guardar operación</button>
+        <button class="secondary" type="button" @click="$emit('back')">Volver al formulario</button>
+        <button class="primary" type="button" :disabled="saving" @click="$emit('save')">
+          {{ saving ? 'Guardando...' : 'Guardar operación' }}
+        </button>
       </div>
     </div>
 
@@ -142,12 +144,13 @@ import {
   formatInstallmentRangeLabel
 } from '../../shared/utils/loan-labels.js'
 
+defineEmits(['back', 'save'])
+
 const props = defineProps({
   calculation: { type: Object, default: null },
-  request: { type: Object, default: null }
+  request: { type: Object, default: null },
+  saving: { type: Boolean, default: false }
 })
-
-defineEmits(['back', 'save'])
 
 const calc = computed(() => props.calculation?.calculation || props.calculation || {})
 const summary = computed(() => calc.value?.summary || props.calculation?.summary || {})
@@ -173,7 +176,7 @@ const summaryCards = computed(() => [
   { label: 'Cuota balloon', value: formatMoney(summary.value.balloonAmount, props.request?.loan?.operationCurrency) },
   { label: 'Cuota base', value: formatMoney(summary.value.baseInstallment, props.request?.loan?.operationCurrency) },
   { label: 'Total a pagar', value: formatMoney(summary.value.totalPayable, props.request?.loan?.operationCurrency) },
-  { label: 'TCEA', value: formatPercent((indicators.value.effectiveAnnualCost ?? 0) * ((Math.abs(indicators.value.effectiveAnnualCost ?? 0) < 1) ? 100 : 1)) }
+  { label: 'TCEA', value: formatPercent((indicators.value.effectiveAnnualCost ?? 0) * (Math.abs(indicators.value.effectiveAnnualCost ?? 0) < 1 ? 100 : 1)) }
 ])
 
 const totals = computed(() => {
@@ -277,6 +280,10 @@ function effectOfFinancing(mode) {
   font-weight: 700;
   letter-spacing: 0.03em;
   cursor: pointer;
+}
+.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 .secondary {
   background: #e2e7ed;

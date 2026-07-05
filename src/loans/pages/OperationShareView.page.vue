@@ -4,7 +4,7 @@
       <div>
         <p class="eyebrow">Compartir operación</p>
         <h1>Compartir operación</h1>
-        <p class="subtitle">{{ shareUrl }}</p>
+        <p class="subtitle">{{ publicShareUrl }}</p>
       </div>
       <div class="header-actions">
         <button class="secondary" type="button" @click="goBackToDetail">Volver al detalle</button>
@@ -31,9 +31,10 @@
       </section>
 
       <section class="card qr-card">
-        <canvas ref="qrCanvas" class="qr-canvas"></canvas>
+        <img v-if="qrImageUrl" :src="qrImageUrl" alt="QR de la operación compartida" class="qr-image" />
+        <div v-else class="qr-placeholder">QR no disponible</div>
         <div class="link-box">
-          <input :value="shareUrl" readonly />
+          <input :value="publicShareUrl" readonly />
           <button class="secondary" type="button" @click="copyLink">Copiar enlace</button>
         </div>
       </section>
@@ -42,11 +43,12 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import QRCode from 'qrcode'
 import { loanService } from '../services/loan.service.js'
 import { formatOperationStatusLabel } from '../../shared/utils/loan-labels.js'
+import { buildPublicQuoteUrl } from '../../shared/utils/public-share.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -55,10 +57,10 @@ const loading = ref(true)
 const error = ref('')
 const detail = ref({})
 const share = ref(null)
-const qrCanvas = ref(null)
+const qrImageUrl = ref('')
 
 const operationId = computed(() => route.params.id)
-const shareUrl = computed(() => share.value?.shareUrl || '')
+const publicShareUrl = computed(() => buildPublicQuoteUrl(share.value))
 const statusLabel = computed(() => formatOperationStatusLabel(detail.value?.status || 'SAVED'))
 const statusClass = computed(() => (detail.value?.status || 'SAVED').toLowerCase())
 
@@ -71,8 +73,8 @@ async function loadShare() {
     if (detail.value?.status !== 'SAVED') {
       throw new Error('Solo las operaciones guardadas se pueden compartir.')
     }
+
     share.value = await loanService.createPublicShare(operationId.value)
-    await nextTick()
     await renderQr()
   } catch (err) {
     error.value = err.message || 'No se pudo cargar la operación compartida.'
@@ -82,9 +84,12 @@ async function loadShare() {
 }
 
 async function renderQr() {
-  if (!qrCanvas.value || !shareUrl.value) return
+  if (!publicShareUrl.value) {
+    qrImageUrl.value = ''
+    return
+  }
 
-  await QRCode.toCanvas(qrCanvas.value, shareUrl.value, {
+  qrImageUrl.value = await QRCode.toDataURL(publicShareUrl.value, {
     width: 240,
     margin: 2,
     errorCorrectionLevel: 'M',
@@ -96,19 +101,16 @@ async function renderQr() {
 }
 
 async function copyLink() {
-  if (!shareUrl.value) return
-  await navigator.clipboard.writeText(shareUrl.value)
+  if (!publicShareUrl.value) return
+  await navigator.clipboard.writeText(publicShareUrl.value)
 }
 
 function goBackToDetail() {
   router.push({ name: 'operation-detail', params: { id: operationId.value } })
 }
 
-watch(shareUrl, async () => {
-  if (shareUrl.value) {
-    await nextTick()
-    await renderQr()
-  }
+watch(publicShareUrl, async () => {
+  await renderQr()
 })
 
 onMounted(loadShare)
@@ -221,12 +223,21 @@ h1 {
   place-items: center;
 }
 
-.qr-canvas {
+.qr-image,
+.qr-placeholder {
   width: 240px;
   height: 240px;
   background: #fff;
   border: 1px solid #e3e8ef;
   border-radius: 16px;
+}
+
+.qr-placeholder {
+  display: grid;
+  place-items: center;
+  color: #6f7d8f;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .link-box {

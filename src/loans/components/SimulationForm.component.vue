@@ -218,13 +218,7 @@
           <button class="primary light full" type="submit" :disabled="calculating">
             {{ calculating ? 'Calculando...' : 'Calcular' }}
           </button>
-          <button
-            class="primary save full"
-            type="button"
-            :disabled="!calculation || saving"
-            @click="$emit('save')"
-          >            {{ saving ? 'Guardando...' : savedOperation ? 'Operación guardada' : 'Guardar operación' }}
-          </button>          <button class="danger full" type="button" @click="handleReset">Reiniciar simulación</button>
+          <button class="danger full" type="button" @click="handleReset">Reiniciar simulación</button>
         </section>
 
         <section class="side-card exchange-card">
@@ -240,13 +234,17 @@
           </div>
           <button class="exchange-refresh" type="button" :disabled="loadingExchange" @click="loadCurrentExchangeRate">
             {{ loadingExchange ? 'Actualizando...' : 'Actualizar tipo de cambio' }}
-          </button>          <p>Valor manual usado para cálculos de cotización entre monedas distintas.</p>
+          </button>
+          <p>Valor manual usado para c?lculos de cotizaci?n entre monedas distintas.</p>
         </section>
 
-        <section class="side-card advisor-tip">          <strong>Recomendación</strong>          <p>Completa los datos del crédito y calcula la cotización para obtener los indicadores financieros.</p>
+        <section class="side-card advisor-tip">
+          <strong>Recomendaci?n</strong>
+          <p>Completa los datos del cr?dito y calcula la cotizaci?n para obtener los indicadores financieros.</p>
         </section>
       </aside>
-    </div>    <!-- Diálogo para cargo inicial -->
+    </div>
+
     <dialog ref="initialChargeDialog" class="dialog">
       <form class="dialog-form" @submit.prevent="saveInitialCharge">        <h2>Cargo inicial</h2>
         <div class="two-cols">          <label>Código del cargo
@@ -391,12 +389,10 @@ const props = defineProps({
   calculation: { type: Object, default: null },
   lastRequest: { type: Object, default: null },
   calculating: { type: Boolean, default: false },
-  saving: { type: Boolean, default: false },
-  savedOperation: { type: Object, default: null },
   initialRequest: { type: Object, default: null }
 })
 
-const emit = defineEmits(['calculate', 'save', 'clear-result'])
+const emit = defineEmits(['calculate', 'clear-result'])
 
 const currencyOptions = CURRENCIES
 const initialChargeCodes = INITIAL_CHARGE_CODES

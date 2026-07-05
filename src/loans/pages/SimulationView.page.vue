@@ -5,11 +5,8 @@
     :calculation="restoredCalculation"
     :last-request="restoredRequest"
     :calculating="calculating"
-    :saving="saving"
-    :saved-operation="savedOperation"
     :initial-request="resumeRequest"
     @calculate="onCalculate"
-    @save="onSave"
     @clear-result="clearResult"
   />
 </template>
@@ -34,9 +31,7 @@ const clients = ref([])
 const vehicles = ref([])
 const router = useRouter()
 const route = useRoute()
-const savedOperation = ref(null)
 const calculating = ref(false)
-const saving = ref(false)
 
 const restoredRequest = computed(() => loadSimulationRequest())
 const restoredCalculation = computed(() => loadSimulationResult())
@@ -61,7 +56,6 @@ async function loadBootstrapData() {
 
 async function onCalculate(request) {
   calculating.value = true
-  savedOperation.value = null
   try {
     const calculation = await loanService.calculateQuote(request)
     saveSimulationRequest(request)
@@ -75,25 +69,7 @@ async function onCalculate(request) {
   }
 }
 
-async function onSave() {
-  const request = loadSimulationRequest()
-  if (!request) {
-    toastService.warning('Calcula una cotización antes de guardar.')
-    return
-  }
-  saving.value = true
-  try {
-    savedOperation.value = await loanService.saveOperation(request)
-    toastService.success('Operación guardada correctamente.')
-  } catch (err) {
-    toastService.error(err.message)
-  } finally {
-    saving.value = false
-  }
-}
-
 function clearResult() {
-  savedOperation.value = null
   clearSimulationSession()
   if (route.query.resume) {
     router.replace({ name: 'simulation' })

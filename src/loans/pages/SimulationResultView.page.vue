@@ -3,6 +3,7 @@
     v-if="calculation && request"
     :calculation="calculation"
     :request="request"
+    :saving="saving"
     @back="goBackToForm"
     @save="onSave"
   />
@@ -22,22 +23,29 @@ import {
 const router = useRouter()
 const calculation = ref(null)
 const request = ref(null)
+const saving = ref(false)
 
 async function onSave() {
-  if (!request.value) {
-    toastService.warning('No hay una solicitud de simulación disponible para guardar.')
+  if (!request.value || saving.value) {
+    if (!request.value) {
+      toastService.warning('No hay una solicitud de simulación disponible para guardar.')
+    }
     return
   }
 
+  saving.value = true
+
   try {
     const savedOperation = await loanService.saveOperation(request.value)
-    toastService.success('Operación guardada correctamente.')
+    toastService.success('La operación ya quedó guardada.')
     router.push({
       name: 'operation-detail',
       params: { id: savedOperation.identifier || savedOperation.operationId || savedOperation.id }
     })
   } catch (err) {
     toastService.error(err.message)
+  } finally {
+    saving.value = false
   }
 }
 
