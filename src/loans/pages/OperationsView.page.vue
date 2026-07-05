@@ -74,6 +74,7 @@
             v-for="operation in group.items"
             :key="operation.identifier"
             class="operation-card"
+            @click="openOperation(operation.identifier)"
           >
             <div class="card-main">
               <span class="eyebrow">Asset Profile</span>
@@ -93,9 +94,14 @@
                 <span class="status-pill" :class="statusClass(operation.status)">
                   {{ statusLabel(operation.status) }}
                 </span>
-                <span class="arrow-icon" aria-hidden="true">
+                <button
+                  class="arrow-icon"
+                  type="button"
+                  title="Open operation detail"
+                  @click.stop="openOperation(operation.identifier)"
+                >
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.29 6.71a1 1 0 011.42 0L16 12l-5.29 5.29a1 1 0 01-1.42-1.42L13.17 12 9.29 8.12a1 1 0 010-1.41z" fill="currentColor"/></svg>
-                </span>
+                </button>
               </div>
             </footer>
           </article>
@@ -211,6 +217,11 @@ function clearFilters() {
 
 function goToNewSimulation() {
   router.push('/simulation')
+}
+
+function openOperation(operationId) {
+  if (!operationId) return
+  router.push(`/operation/${operationId}`)
 }
 
 function exportCsv() {
@@ -480,12 +491,14 @@ onMounted(() => {
   border-left: 4px solid transparent;
   border-radius: 8px;
   box-shadow: 0 8px 22px rgba(8, 38, 74, 0.04);
-  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  cursor: pointer;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
 
 .operation-card:hover {
   border-left-color: #9bbcff;
   box-shadow: 0 14px 28px rgba(8, 38, 74, 0.08);
+  transform: translateY(-1px);
 }
 
 .card-main {
@@ -574,7 +587,15 @@ onMounted(() => {
   place-items: center;
   width: 34px;
   height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
   color: #365b8c;
+  cursor: pointer;
+}
+
+.arrow-icon:hover {
+  background: #edf4ff;
 }
 
 .state-panel {

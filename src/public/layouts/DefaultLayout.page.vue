@@ -35,7 +35,7 @@ const currentRouteName = computed(() => {
 const currentRouteMeta = computed(() => route.meta || {})
 
 const showLayoutHeader = computed(() => {
-  return !['dashboard', 'clients', 'vehicles', 'operations', 'support'].includes(route.name)
+  return !['dashboard', 'clients', 'vehicles', 'operations', 'operation-detail', 'support'].includes(route.name)
 })
 
 function reloadCurrentView() {

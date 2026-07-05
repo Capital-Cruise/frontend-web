@@ -68,11 +68,11 @@
             <label>Periodo de la tasa
               <select v-model="rate.ratePeriod">
                 <option value="ANNUAL">Anual</option>
-                <option value="Mensual">Mensual</option>
+                <option value="MONTHLY">Mensual</option>
               </select>
             </label>            <label v-show="rate.rateType === 'NOMINAL'">Frecuencia de capitalización
               <select v-model="rate.capitalizationFrequency">
-                <option value="Mensual">Mensual</option>
+                <option value="MONTHLY">Mensual</option>
                 <option value="DAILY">Diaria</option>
                 <option value="QUARTERLY">Trimestral</option>
                 <option value="SEMI_ANNUAL">Semestral</option>
@@ -87,7 +87,7 @@
             <label>Periodo de la tasa de descuento
               <select v-model="financialEvaluation.discountRatePeriod">
                 <option value="ANNUAL">Anual</option>
-                <option value="Mensual">Mensual</option>
+                <option value="MONTHLY">Mensual</option>
               </select>
             </label>
             <label>COK / valor de la tasa de descuento (%)
@@ -337,7 +337,7 @@
           </template>
           <label>Frecuencia
             <select v-model="editingPeriodicCharge.frequency">
-              <option>Mensual</option>
+              <option value="MONTHLY">Mensual</option>
               <option>ANNUAL_PRORATED_MONTHLY</option>
             </select>
           </label>
@@ -401,7 +401,7 @@ const rate = reactive({
   rateType: 'EFFECTIVE',
   ratePeriod: 'ANNUAL',
   rateValue: 9,
-  capitalizationFrequency: 'Mensual'
+  capitalizationFrequency: 'MONTHLY'
 })
 
 const grace = reactive({
@@ -439,9 +439,9 @@ const initialCharges = ref([
 ])
 
 const periodicCharges = ref([
-  { code: 'POSTAGE', label: 'Portes', chargeType: 'FIXED_AMOUNT', amount: 20, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
-  { code: 'ADMIN_FEE', label: 'Gastos de administración', chargeType: 'FIXED_AMOUNT', amount: 40, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
-  { code: 'LIFE_INSURANCE', label: 'Seguro de desgravamen', chargeType: 'RATE', amount: null, currency: null, ratePercent: 0.05, rateBase: 'OPENING_BALANCE', frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
+  { code: 'POSTAGE', label: 'Portes', chargeType: 'FIXED_AMOUNT', amount: 20, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'MONTHLY', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
+  { code: 'ADMIN_FEE', label: 'Gastos de administración', chargeType: 'FIXED_AMOUNT', amount: 40, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'MONTHLY', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
+  { code: 'LIFE_INSURANCE', label: 'Seguro de desgravamen', chargeType: 'RATE', amount: null, currency: null, ratePercent: 0.05, rateBase: 'OPENING_BALANCE', frequency: 'MONTHLY', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
   { code: 'VEHICLE_INSURANCE', label: 'Seguro vehicular todo riesgo', chargeType: 'RATE', amount: null, currency: null, ratePercent: 4.50, rateBase: 'VEHICLE_PRICE', frequency: 'ANNUAL_PRORATED_MONTHLY', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 }
 ])
 
@@ -468,7 +468,7 @@ const editingPeriodicCharge = reactive({
   currency: 'USD',
   ratePercent: null,
   rateBase: 'VEHICLE_PRICE',
-  frequency: 'Mensual',
+    frequency: 'MONTHLY',
   appliesDuringGrace: true,
   fromInstallment: 1,
   toInstallment: 48
@@ -573,9 +573,9 @@ function applyRequestToForm(request) {
   vehiclePrice.value = Number(request.vehicle?.vehiclePrice || vehiclePrice.value)
 
   rate.rateType = request.rate?.rateType || 'EFFECTIVE'
-  rate.ratePeriod = request.rate?.ratePeriod || 'ANNUAL'
+  rate.ratePeriod = normalizeRatePeriod(request.rate?.ratePeriod || 'ANNUAL')
   rate.rateValue = Number(request.rate?.rateValue || 0)
-  rate.capitalizationFrequency = request.rate?.capitalizationFrequency || 'Mensual'
+  rate.capitalizationFrequency = normalizeCapitalizationFrequency(request.rate?.capitalizationFrequency || 'MONTHLY')
 
   grace.graceType = request.grace?.graceType || 'NONE'
   grace.gracePeriods = Number(request.grace?.gracePeriods || 0)
@@ -594,7 +594,7 @@ function applyRequestToForm(request) {
     : 'percent'
 
   financialEvaluation.discountRateType = request.financialEvaluation?.discountRateType || 'EFFECTIVE'
-  financialEvaluation.discountRatePeriod = request.financialEvaluation?.discountRatePeriod || 'ANNUAL'
+  financialEvaluation.discountRatePeriod = normalizeRatePeriod(request.financialEvaluation?.discountRatePeriod || 'ANNUAL')
   financialEvaluation.discountRateValue = Number(request.financialEvaluation?.discountRateValue || 0)
 
   exchangeRate.mode = request.exchangeRate?.mode || 'MANUAL'
@@ -604,7 +604,10 @@ function applyRequestToForm(request) {
     ? request.additionalCharges.initialCharges.map(charge => ({ ...charge }))
     : []
   periodicCharges.value = Array.isArray(request.additionalCharges?.periodicCharges)
-    ? request.additionalCharges.periodicCharges.map(charge => ({ ...charge }))
+    ? request.additionalCharges.periodicCharges.map(charge => ({
+      ...charge,
+      frequency: normalizeChargeFrequency(charge.frequency)
+    }))
     : []
 
   hydratingRequest.value = false
@@ -659,7 +662,7 @@ function addPeriodicCharge() {
     currency: 'USD',
     ratePercent: null,
     rateBase: 'VEHICLE_PRICE',
-    frequency: 'Mensual',
+    frequency: 'MONTHLY',
     appliesDuringGrace: true,
     fromInstallment: 1,
     toInstallment: loan.termMonths || 48
@@ -712,6 +715,32 @@ async function loadCurrentExchangeRate(showToast = true) {
   }
 }
 
+function normalizeMonthlyEnum(value) {
+  if (!value) return 'MONTHLY'
+  const normalized = String(value).trim().toUpperCase()
+  if (normalized === 'MENSUAL') return 'MONTHLY'
+  return normalized
+}
+
+function normalizeRatePeriod(value) {
+  const normalized = normalizeMonthlyEnum(value)
+  return ['MONTHLY', 'ANNUAL'].includes(normalized) ? normalized : 'ANNUAL'
+}
+
+function normalizeCapitalizationFrequency(value) {
+  const normalized = normalizeMonthlyEnum(value)
+  return ['DAILY', 'MONTHLY', 'QUARTERLY', 'SEMI_ANNUAL', 'ANNUAL'].includes(normalized)
+    ? normalized
+    : 'MONTHLY'
+}
+
+function normalizeChargeFrequency(value) {
+  const normalized = normalizeMonthlyEnum(value)
+  return ['MONTHLY', 'ANNUAL_PRORATED_MONTHLY'].includes(normalized)
+    ? normalized
+    : 'MONTHLY'
+}
+
 // ===== Build Request =====
 function buildQuoteRequest() {
   const client = getSelectedClient()
@@ -732,7 +761,7 @@ function buildQuoteRequest() {
       brand: vehicle.brand,
       model: vehicle.model,
       year: Number(vehicle.year),
-      vehicleTipo: vehicle.vehicleTipo || 'OTHER',
+      vehicleType: vehicle.vehicleType || 'OTHER',
       vehiclePrice: Number(vehiclePrice.value || vehicle.price),
       currency: loan.operationCurrency
     },
@@ -745,9 +774,11 @@ function buildQuoteRequest() {
     },
     rate: {
       rateType: rate.rateType,
-      ratePeriod: rate.ratePeriod,
+      ratePeriod: normalizeRatePeriod(rate.ratePeriod),
       rateValue: Number(rate.rateValue || 0),
-      capitalizationFrequency: rate.rateType === 'NOMINAL' ? rate.capitalizationFrequency : null
+      capitalizationFrequency: rate.rateType === 'NOMINAL'
+        ? normalizeCapitalizationFrequency(rate.capitalizationFrequency)
+        : null
     },
     grace: {
       graceType: grace.graceType,
@@ -764,12 +795,13 @@ function buildQuoteRequest() {
       initialCharges: initialCharges.value,
       periodicCharges: periodicCharges.value.map(p => ({
         ...p,
+        frequency: normalizeChargeFrequency(p.frequency),
         toInstallment: Math.min(Number(p.toInstallment || termMonths), termMonths)
       }))
     },
     financialEvaluation: {
       discountRateType: financialEvaluation.discountRateType,
-      discountRatePeriod: financialEvaluation.discountRatePeriod,
+      discountRatePeriod: normalizeRatePeriod(financialEvaluation.discountRatePeriod),
       discountRateValue: Number(financialEvaluation.discountRateValue || 0)
     },
     exchangeRate: {
@@ -800,7 +832,7 @@ function resetForm() {
   rate.rateType = 'EFFECTIVE'
   rate.ratePeriod = 'ANNUAL'
   rate.rateValue = 9
-  rate.capitalizationFrequency = 'Mensual'
+  rate.capitalizationFrequency = 'MONTHLY'
   grace.graceType = 'NONE'
   grace.gracePeriods = 0
   balloon.enabled = false
@@ -820,9 +852,9 @@ function resetForm() {
   ]
 
   periodicCharges.value = [
-    { code: 'POSTAGE', label: 'Portes', chargeType: 'FIXED_AMOUNT', amount: 20, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
-    { code: 'ADMIN_FEE', label: 'Gastos de administración', chargeType: 'FIXED_AMOUNT', amount: 40, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
-    { code: 'LIFE_INSURANCE', label: 'Seguro de desgravamen', chargeType: 'RATE', amount: null, currency: null, ratePercent: 0.05, rateBase: 'OPENING_BALANCE', frequency: 'Mensual', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
+    { code: 'POSTAGE', label: 'Portes', chargeType: 'FIXED_AMOUNT', amount: 20, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'MONTHLY', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
+    { code: 'ADMIN_FEE', label: 'Gastos de administración', chargeType: 'FIXED_AMOUNT', amount: 40, currency: 'USD', ratePercent: null, rateBase: null, frequency: 'MONTHLY', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
+    { code: 'LIFE_INSURANCE', label: 'Seguro de desgravamen', chargeType: 'RATE', amount: null, currency: null, ratePercent: 0.05, rateBase: 'OPENING_BALANCE', frequency: 'MONTHLY', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 },
     { code: 'VEHICLE_INSURANCE', label: 'Seguro vehicular todo riesgo', chargeType: 'RATE', amount: null, currency: null, ratePercent: 4.50, rateBase: 'VEHICLE_PRICE', frequency: 'ANNUAL_PRORATED_MONTHLY', appliesDuringGrace: true, fromInstallment: 1, toInstallment: 48 }
   ]
   syncVehiclePriceFromSelection()
