@@ -2,23 +2,23 @@
   <div class="vehicles-page">
     <header class="page-header">
       <div>
-        <h1>Vehicles</h1>
+        <h1>Vehículos</h1>
         <p>
-          Manage and analyze the asset portfolio for Capital Cruise. Review technical
-          specifications and valuation data for high-value simulated operations.
+          Gestiona y analiza el inventario vehicular para Capital Cruise. Revisa especificaciones
+          técnicas y datos de valorización para operaciones simuladas de crédito.
         </p>
       </div>
       <button class="add-btn" type="button" @click="$emit('add')">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
         </svg>
-        Add Vehicle
+        Nuevo vehículo
       </button>
     </header>
 
     <section class="filters-card">
       <label class="filter-field search-field">
-        <span>Search Database</span>
+        <span>Buscar en la base</span>
         <div class="search-input">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -29,28 +29,28 @@
           <input
             :value="filters.search"
             type="search"
-            placeholder="Search by Brand, Model or VIN..."
+            placeholder="Buscar por marca, modelo o VIN..."
             @input="$emit('filter-change', { ...filters, search: $event.target.value })"
           />
         </div>
       </label>
       <label class="filter-field">
-        <span>Brand</span>
+        <span>Marca</span>
         <select
           :value="filters.brand"
           @change="$emit('filter-change', { ...filters, brand: $event.target.value })"
         >
-          <option value="">All Brands</option>
+          <option value="">Todas las marcas</option>
           <option v-for="brand in brands" :key="brand" :value="brand">{{ brand }}</option>
         </select>
       </label>
       <label class="filter-field">
-        <span>Year</span>
+        <span>Año</span>
         <select
           :value="filters.year"
           @change="$emit('filter-change', { ...filters, year: $event.target.value })"
         >
-          <option value="">All</option>
+          <option value="">Todos</option>
           <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
         </select>
       </label>
@@ -61,20 +61,16 @@
             fill="currentColor"
           />
         </svg>
-        More Filters
+        Más filtros
       </button>
     </section>
 
-    <div v-if="loading" class="grid-state">Loading vehicles...</div>
+    <div v-if="loading" class="grid-state">Cargando vehículos...</div>
     <div v-else-if="vehicles.length === 0" class="grid-state">
-      No vehicles found. Adjust your filters or add a new vehicle.
+      No se encontraron vehículos. Ajusta los filtros o agrega un nuevo vehículo.
     </div>
     <section v-else class="vehicle-grid">
-      <article
-        v-for="vehicle in vehicles"
-        :key="vehicle.identifier"
-        class="vehicle-card"
-      >
+      <article v-for="vehicle in vehicles" :key="vehicle.identifier" class="vehicle-card">
         <div class="vehicle-image-wrap">
           <img
             :src="imageFor(vehicle)"
@@ -86,7 +82,7 @@
           <button
             type="button"
             class="edit-btn"
-            aria-label="Edit vehicle"
+            aria-label="Editar vehículo"
             @click="$emit('edit', vehicle)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -103,7 +99,7 @@
             <span>{{ vehicle.subtitle }}</span>
           </div>
           <div class="price-block">
-            <span class="price-label">Market Value</span>
+            <span class="price-label">Valor comercial</span>
             <strong>{{ formatMoney(vehicle.price, vehicle.currency) }}</strong>
           </div>
         </div>
@@ -111,13 +107,13 @@
     </section>
 
     <footer v-if="totalElements > 0" class="grid-footer">
-      <span>Showing {{ rangeStart }} to {{ rangeEnd }} of {{ totalElements }} vehicles</span>
+      <span>Mostrando {{ rangeStart }} a {{ rangeEnd }} de {{ totalElements }} vehículos</span>
       <div class="pagination">
         <button
           type="button"
           class="page-btn"
           :disabled="page === 0"
-          aria-label="Previous page"
+          aria-label="Página anterior"
           @click="$emit('page-change', page - 1)"
         >
           ‹
@@ -136,7 +132,7 @@
           type="button"
           class="page-btn"
           :disabled="page >= totalPages - 1"
-          aria-label="Next page"
+          aria-label="Página siguiente"
           @click="$emit('page-change', page + 1)"
         >
           ›
@@ -205,7 +201,7 @@ function onImageError(vehicle) {
 
 function formatMoney(value, currency = 'USD') {
   const amount = Number(value ?? 0)
-  return `${currency} ${amount.toLocaleString('en-US', {
+  return `${currency} ${amount.toLocaleString('es-PE', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   })}`

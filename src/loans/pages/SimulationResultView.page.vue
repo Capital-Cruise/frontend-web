@@ -27,13 +27,13 @@ const savedOperation = ref(null)
 
 async function onSave() {
   if (!request.value) {
-    toastService.warning('No simulation request available to save')
+    toastService.warning('No hay una solicitud de simulación disponible para guardar.')
     return
   }
 
   try {
     savedOperation.value = await loanService.saveOperation(request.value)
-    toastService.success('Operation saved successfully')
+    toastService.success('Operación guardada correctamente.')
   } catch (err) {
     toastService.error(err.message)
   }
@@ -47,7 +47,7 @@ function goToSavedOperation() {
   if (savedOperation.value?.identifier) {
     router.push(`/operation/${savedOperation.value.identifier}`)
   } else {
-    toastService.warning('Save the operation before sharing')
+    toastService.warning('Guarda la operación antes de compartirla.')
   }
 }
 
@@ -56,7 +56,7 @@ function restoreSimulationData() {
   calculation.value = loadSimulationResult()
 
   if (!request.value || !calculation.value) {
-    toastService.warning('No simulation result found. Complete the form to calculate a new quote.')
+    toastService.warning('No se encontró un resultado de simulación. Completa el formulario para generar una nueva cotización.')
     router.replace({ name: 'simulation' })
   }
 }

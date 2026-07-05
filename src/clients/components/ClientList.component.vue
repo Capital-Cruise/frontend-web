@@ -2,35 +2,35 @@
   <div class="clients-page">
     <header class="page-header">
       <div>
-        <h1>Clients</h1>
+        <h1>Clientes</h1>
         <p>
-          Manage your client registry, view detailed portfolios, and initiate new loan
-          simulations for your active base.
+          Gestiona el registro de clientes, revisa su perfil financiero e inicia nuevas
+          simulaciones de crédito para tu base activa.
         </p>
       </div>
       <button class="add-btn" type="button" @click="$emit('add')">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
         </svg>
-        Add Client
+        Nuevo cliente
       </button>
     </header>
 
     <section class="table-card">
-      <div v-if="loading" class="table-state">Loading clients...</div>
+      <div v-if="loading" class="table-state">Cargando clientes...</div>
       <div v-else-if="clients.length === 0" class="table-state">
-        No clients found. Add your first client to get started.
+        No hay clientes registrados. Agrega tu primer cliente para comenzar.
       </div>
       <div v-else class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Full Name</th>
-              <th>Document Number</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Created Date</th>
-              <th>Actions</th>
+              <th>Nombre completo</th>
+              <th>Número de documento</th>
+              <th>Teléfono</th>
+              <th>Correo electrónico</th>
+              <th>Fecha de registro</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -57,7 +57,7 @@
                   <button
                     type="button"
                     class="icon-btn"
-                    aria-label="Edit client"
+                    aria-label="Editar cliente"
                     @click="$emit('edit', client)"
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -75,15 +75,13 @@
       </div>
 
       <footer v-if="totalElements > 0" class="table-footer">
-        <span>
-          Showing {{ rangeStart }} to {{ rangeEnd }} of {{ totalElements }} clients
-        </span>
+        <span>Mostrando {{ rangeStart }} a {{ rangeEnd }} de {{ totalElements }} clientes</span>
         <div class="pagination">
           <button
             type="button"
             class="page-btn"
             :disabled="page === 0"
-            aria-label="Previous page"
+            aria-label="Página anterior"
             @click="$emit('page-change', page - 1)"
           >
             ‹
@@ -102,7 +100,7 @@
             type="button"
             class="page-btn"
             :disabled="page >= totalPages - 1"
-            aria-label="Next page"
+            aria-label="Página siguiente"
             @click="$emit('page-change', page + 1)"
           >
             ›
@@ -175,7 +173,7 @@ function formatDocument(value = '') {
 
 function formatDate(value) {
   if (!value) return '—'
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('es-PE', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'

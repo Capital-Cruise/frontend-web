@@ -2,35 +2,36 @@
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-logo">CAPITALCRUISE</div>
-      <div class="brand-subtitle">Loan Advisory Portal</div>
+      <div class="brand-subtitle">Portal de asesoría crediticia</div>
     </div>
     <nav>
       <router-link
-          v-for="item in navItems"
-          :key="item.path"
-          :to="item.path"
-          class="nav"
-          active-class="active"
-          exact-active-class="active"
+        v-for="item in navItems"
+        :key="item.path"
+        :to="item.path"
+        class="nav"
+        active-class="active"
+        exact-active-class="active"
       >
         {{ item.label }}
       </router-link>
     </nav>
     <div class="sidebar-footer">
-      <button class="danger subtle" @click="$emit('logout')">Logout</button>
+      <button class="danger subtle" @click="$emit('logout')">Cerrar sesión</button>
     </div>
   </aside>
 </template>
 
 <script setup>
-const emit = defineEmits(['logout'])
+defineEmits(['logout'])
 
 const navItems = [
-  { path: '/', label: 'Dashboard' },
-  { path: '/clients', label: 'Clients' },
-  { path: '/vehicles', label: 'Vehicles' },
-  { path: '/simulation', label: 'New Simulation' },
-  { path: '/operations', label: 'Saved Operations' }
+  { path: '/', label: 'Panel principal' },
+  { path: '/clients', label: 'Clientes' },
+  { path: '/vehicles', label: 'Vehículos' },
+  { path: '/simulation', label: 'Simulación' },
+  { path: '/operations', label: 'Operaciones' },
+  { path: '/support', label: 'Ayuda' }
 ]
 </script>
 

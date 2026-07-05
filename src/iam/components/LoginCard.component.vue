@@ -2,22 +2,20 @@
   <div class="login-page">
     <header class="brand-header">
       <img src="/logo.png" alt="CapitalCruise" class="brand-logo" />
-      <p class="brand-subtitle">Portal Seguro de Gestión de Patrimonio</p>
+      <p class="brand-subtitle">Acceso seguro al simulador de crédito vehicular</p>
     </header>
 
     <form class="login-card" @submit.prevent="handleLogin">
-      <h1>Acceso Seguro</h1>
-      <p class="login-description">
-        Por favor, ingrese sus credenciales para acceder a su panel de asesoría.
-      </p>
+      <h1>Acceso seguro</h1>
+      <p class="login-description">Ingresa tus credenciales para continuar.</p>
 
       <div class="field">
-        <label for="loginUser">Correo electrónico</label>
+        <label for="loginUser">Usuario o correo electrónico</label>
         <input
           id="loginUser"
           type="email"
           v-model="username"
-          placeholder="advisor@capitalcruise.com"
+          placeholder="usuario@capitalcruise.com"
           autocomplete="username"
         />
       </div>
@@ -55,7 +53,7 @@
 
       <label class="remember-device">
         <input type="checkbox" v-model="rememberDevice" />
-        <span>Recordar este dispositivo por 30 días</span>
+        <span>Recordarme en este dispositivo por 30 días</span>
       </label>
 
       <button type="submit" class="primary full" :disabled="loading">
@@ -82,7 +80,7 @@
               fill="currentColor"
             />
           </svg>
-          <span>Protegido por SIPC</span>
+          <span>Respaldo institucional</span>
         </div>
       </div>
     </form>
@@ -112,12 +110,12 @@ async function handleLogin() {
   error.value = ''
 
   if (!username.value.trim()) {
-    error.value = 'Ingrese su correo electrónico.'
+    error.value = 'Ingresa tu usuario o correo electrónico.'
     return
   }
 
   if (!password.value) {
-    error.value = 'Ingrese su contraseña.'
+    error.value = 'Ingresa tu contraseña.'
     return
   }
 
@@ -129,7 +127,7 @@ async function handleLogin() {
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
     router.push(redirect)
   } catch (err) {
-    error.value = err.message || 'No se pudo iniciar sesión. Verifique sus credenciales.'
+    error.value = err.message || 'No se pudo iniciar sesión. Verifica tus credenciales.'
   } finally {
     loading.value = false
   }
