@@ -5,7 +5,6 @@
     :request="request"
     @back="goBackToForm"
     @save="onSave"
-    @share="goToSavedOperation"
   />
 </template>
 
@@ -23,7 +22,6 @@ import {
 const router = useRouter()
 const calculation = ref(null)
 const request = ref(null)
-const savedOperation = ref(null)
 
 async function onSave() {
   if (!request.value) {
@@ -32,8 +30,12 @@ async function onSave() {
   }
 
   try {
-    savedOperation.value = await loanService.saveOperation(request.value)
+    const savedOperation = await loanService.saveOperation(request.value)
     toastService.success('Operación guardada correctamente.')
+    router.push({
+      name: 'operation-detail',
+      params: { id: savedOperation.identifier || savedOperation.operationId || savedOperation.id }
+    })
   } catch (err) {
     toastService.error(err.message)
   }
@@ -41,14 +43,6 @@ async function onSave() {
 
 function goBackToForm() {
   router.push({ name: 'simulation', query: { resume: '1' } })
-}
-
-function goToSavedOperation() {
-  if (savedOperation.value?.identifier) {
-    router.push(`/operation/${savedOperation.value.identifier}`)
-  } else {
-    toastService.warning('Guarda la operación antes de compartirla.')
-  }
 }
 
 function restoreSimulationData() {

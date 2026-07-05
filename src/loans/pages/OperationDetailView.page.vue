@@ -44,9 +44,9 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" fill="currentColor"/></svg>
             Exportar PDF
           </button>
-          <button class="action-btn primary" type="button" disabled>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V7l-4-4zM12 19a3 3 0 110-6 3 3 0 010 6zM6 8V5h9v3H6z" fill="currentColor"/></svg>
-            Operación guardada
+          <button v-if="statusValue === 'SAVED'" class="action-btn primary" type="button" @click="openShare">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16a3.99 3.99 0 00-2.86 1.21L8.91 13.5a4.1 4.1 0 000-3l6.23-3.71A4 4 0 1014 4a3.99 3.99 0 00.14 1.06L7.91 8.77a4 4 0 100 6.46l6.23 3.71A4 4 0 1018 16z" fill="currentColor"/></svg>
+            Compartir
           </button>
         </div>
       </header>
@@ -85,7 +85,7 @@
                 <tr v-if="initialChargeRows.length === 0">
                   <td colspan="5">No hay cargos iniciales.</td>
                 </tr>
-                <tr v-for="charge in initialChargeRows" :key="charge.code">
+                <tr v-for="charge in initialChargeRows" :key="charge.code || charge.label">
                   <td>{{ formatChargeCodeLabel(charge.code) }}</td>
                   <td>{{ charge.label }}</td>
                   <td>
@@ -95,7 +95,7 @@
                     </div>
                   </td>
                   <td>{{ formatFinancingModeLabel(charge.financingMode) }}</td>
-                  <td>{{ effectOfFinancing(charge.financingMode) }}</td>
+                  <td>{{ formatChargeEffectLabel(charge.financingMode) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -130,7 +130,7 @@
               <tr v-if="periodicChargeRows.length === 0">
                 <td colspan="7">No hay cargos periódicos.</td>
               </tr>
-              <tr v-for="charge in periodicChargeRows" :key="charge.code">
+              <tr v-for="charge in periodicChargeRows" :key="charge.code || charge.label">
                 <td>{{ formatChargeCodeLabel(charge.code) }}</td>
                 <td>{{ charge.label }}</td>
                 <td>{{ formatChargeTypeLabel(charge.chargeType) }}</td>
@@ -158,7 +158,7 @@
           <table>
             <thead>
               <tr>
-                <th>N.? cuota</th>
+                <th>N.º cuota</th>
                 <th>Fecha</th>
                 <th>Gracia</th>
                 <th>Saldo inicial</th>
@@ -196,7 +196,19 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { loanService } from '../services/loan.service.js'
 import { toastService } from '../../shared/services/toast.service.js'
-import { formatChargeBaseLabel, formatChargeCodeLabel, formatChargeTypeLabel, formatFrequencyLabel, formatGraceTypeLabel, formatInstallmentRangeLabel, formatFinancingModeLabel, formatOperationStatusLabel, formatBooleanLabel } from '../../shared/utils/loan-labels.js'
+import { normalizeOperationDetail } from '../utils/operation-detail.util.js'
+import {
+  formatChargeBaseLabel,
+  formatChargeCodeLabel,
+  formatChargeEffectLabel,
+  formatChargeTypeLabel,
+  formatCurrencyLabel,
+  formatFinancingModeLabel,
+  formatFrequencyLabel,
+  formatGraceTypeLabel,
+  formatInstallmentRangeLabel,
+  formatOperationStatusLabel
+} from '../../shared/utils/loan-labels.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -207,6 +219,8 @@ const loading = ref(false)
 
 const operationId = computed(() => route.params.id)
 
+const normalizedDetail = computed(() => normalizeOperationDetail(detail.value || {}))
+
 const currency = computed(() =>
   detail.value?.operationCurrency ||
   detail.value?.currency ||
@@ -215,20 +229,21 @@ const currency = computed(() =>
 )
 
 const indicator = computed(() => detail.value?.indicator || {})
-const charges = computed(() => detail.value?.charges || {})
+const statusValue = computed(() => detail.value?.status || 'SAVED')
 
 const clientName = computed(() => detail.value?.clientSnapshotName || 'Cliente sin nombre')
 const vehicleLabel = computed(() => detail.value?.vehicleSnapshotLabel || 'Vehículo sin nombre')
-const statusLabel = computed(() => formatOperationStatusLabel(detail.value?.status || 'SAVED'))
-const statusClass = computed(() => (detail.value?.status || 'SAVED').toLowerCase())
+const statusLabel = computed(() => formatOperationStatusLabel(statusValue.value))
+const statusClass = computed(() => statusValue.value.toLowerCase())
 
 const formattedCreatedAt = computed(() => {
   const value = detail.value?.createdAt || detail.value?.calculatedAt
   if (!value) return 'Sin fecha'
+
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return 'Sin fecha'
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('es-PE', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -236,6 +251,9 @@ const formattedCreatedAt = computed(() => {
     minute: '2-digit'
   }).format(date)
 })
+
+const initialChargeRows = computed(() => normalizedDetail.value.normalizedInitialCharges || [])
+const periodicChargeRows = computed(() => normalizedDetail.value.normalizedPeriodicCharges || [])
 
 const topMetrics = computed(() => [
   {
@@ -249,7 +267,7 @@ const topMetrics = computed(() => [
   },
   {
     label: 'Cargos iniciales financiados',
-    value: formatMoney(detail.value?.initialCargosFinanced ?? indicator.value.initialCargosFinanced)
+    value: formatMoney(detail.value?.initialChargesFinanced ?? indicator.value.initialChargesFinanced)
   },
   {
     label: 'Principal financiado',
@@ -276,129 +294,17 @@ const topMetrics = computed(() => [
 ])
 
 const indicatorMetrics = computed(() => [
-  { label: 'VAN / NPV', value: formatMoney(indicator.value.npv) },
-  { label: 'TIR Mensual', value: formatPercent(indicator.value.irrMonthly) },
-  { label: 'TIR Anual', value: formatPercent(indicator.value.irrAnnual), note: 'Nominal' },
+  { label: 'VAN', value: formatMoney(indicator.value.npv) },
+  { label: 'TIR mensual', value: formatPercent(indicator.value.irrMonthly) },
+  { label: 'TIR anual', value: formatPercent(indicator.value.irrAnnual), note: 'Nominal' },
   { label: 'TCEA', value: formatPercent(indicator.value.effectiveAnnualCost) },
   { label: 'COK', value: formatPercent(detail.value?.discountRate) },
-  { label: 'TIR calculada', value: indicator.value.irrConverged ? 'Sí' : 'No' }
+  { label: 'TIR calculada', value: formatBooleanLabel(indicator.value.irrConverged) }
 ])
 
 const firstMonthlyPayment = computed(() => {
   const payableRow = schedule.value.find((row) => Number(row.totalInstallment || 0) > 0)
   return payableRow?.totalInstallment ?? null
-})
-
-const initialChargeRows = computed(() => {
-  if (Array.isArray(detail.value?.initialCargos) && detail.value.initialCargos.length > 0) {
-    return detail.value.initialCargos
-  }
-
-  const rows = [
-    {
-      code: 'INITIAL_FINANCED',
-      label: 'Cargos iniciales financiados',
-      amount: detail.value?.initialCargosFinanced ?? indicator.value.initialCargosFinanced,
-      financingMode: 'FINANCED'
-    },
-    {
-      code: 'PAID_UPFRONT',
-      label: 'Cargos iniciales pagados al inicio',
-      amount: detail.value?.initialCargosPaidUpfront ?? indicator.value.initialCargosPaidUpfront,
-      financingMode: 'PAID_UPFRONT'
-    },
-    {
-      code: 'WITHHELD',
-      label: 'Cargos iniciales retenidos',
-      amount: detail.value?.initialCargosWithheld ?? indicator.value.initialCargosWithheld,
-      financingMode: 'WITHHELD'
-    }
-  ]
-
-  if (charges.value.initialCargos != null) {
-    rows.push({
-      code: 'INITIAL_TOTAL',
-      label: 'Total de cargos iniciales',
-      amount: charges.value.initialCargos,
-      financingMode: 'FINANCED'
-    })
-  }
-
-  return rows.filter((row) => Number(row.amount ?? 0) !== 0)
-})
-
-const periodicChargeRows = computed(() => {
-  if (Array.isArray(detail.value?.periodicCargos) && detail.value.periodicCargos.length > 0) {
-    return detail.value.periodicCargos
-  }
-
-  const term = detail.value?.termMonths || schedule.value.length || '--'
-  const rows = [
-    {
-      code: 'POSTAGE',
-      label: 'Porte',
-      chargeType: 'FIXED_AMOUNT',
-      amount: charges.value.postageFee,
-      currency: currency.value,
-      ratePercent: null,
-      rateBase: null,
-      frequency: 'MONTHLY',
-      fromInstallment: 1,
-      toInstallment: term
-    },
-    {
-      code: 'ADMIN_FEE',
-      label: 'Gastos de administración',
-      chargeType: 'FIXED_AMOUNT',
-      amount: charges.value.administrativeFee,
-      currency: currency.value,
-      ratePercent: null,
-      rateBase: null,
-      frequency: 'MONTHLY',
-      fromInstallment: 1,
-      toInstallment: term
-    },
-    {
-      code: 'PERIODIC_COMMISSION',
-      label: 'Comisión periódica',
-      chargeType: 'FIXED_AMOUNT',
-      amount: charges.value.periodicCommission,
-      currency: currency.value,
-      ratePercent: null,
-      rateBase: null,
-      frequency: 'MONTHLY',
-      fromInstallment: 1,
-      toInstallment: term
-    },
-    {
-      code: 'LIFE_INSURANCE',
-      label: 'Seguro de desgravamen',
-      chargeType: 'RATE',
-      amount: null,
-      currency: null,
-      ratePercent: charges.value.desgravamenRate,
-      rateBase: 'OPENING_BALANCE',
-      frequency: 'MONTHLY',
-      fromInstallment: 1,
-      toInstallment: term
-    },
-    {
-      code: 'VEHICLE_INSURANCE',
-      label: 'Seguro vehicular todo riesgo',
-      chargeType: 'RATE',
-      amount: null,
-      currency: null,
-      ratePercent: charges.value.vehicleSegurosRate,
-      rateBase: 'VEHICLE_PRICE',
-      frequency: 'ANNUAL_PRORATED_MONTHLY',
-      fromInstallment: 1,
-      toInstallment: term
-    }
-  ]
-
-  return rows.filter((row) => row.chargeType === 'RATE'
-    ? row.ratePercent !== null && row.ratePercent !== undefined
-    : row.amount !== null && row.amount !== undefined)
 })
 
 const payoffSummary = computed(() => [
@@ -420,9 +326,7 @@ async function loadDetail() {
   try {
     const detailData = await loanService.getOperationDetail(operationId.value)
     detail.value = detailData
-    schedule.value = Array.isArray(detailData?.schedule)
-      ? detailData.schedule
-      : []
+    schedule.value = Array.isArray(detailData?.schedule) ? detailData.schedule : []
 
     if (schedule.value.length === 0) {
       const scheduleData = await loanService.getOperationSchedule(operationId.value)
@@ -444,20 +348,31 @@ function recalculate() {
   router.push('/simulation')
 }
 
+function openShare() {
+  if (!operationId.value) return
+  router.push({ name: 'operation-share', params: { id: operationId.value } })
+}
+
 function exportPdf() {
   document.title = `Capital Cruise Operación ${operationId.value}`
   window.print()
 }
 
 function formatMoney(value, displayCurrency = currency.value) {
-  if (value === null || value === undefined || value === '') return `${displayCurrency} --`
+  if (value === null || value === undefined || value === '') return `${formatDisplayCurrency(displayCurrency)} --`
   const n = Number(value)
-  if (Number.isNaN(n)) return `${displayCurrency} --`
+  if (Number.isNaN(n)) return `${formatDisplayCurrency(displayCurrency)} --`
 
-  return `${displayCurrency} ${n.toLocaleString('en-US', {
+  return `${formatDisplayCurrency(displayCurrency)} ${n.toLocaleString('es-PE', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   })}`
+}
+
+function formatDisplayCurrency(value) {
+  if (value === 'PEN') return 'S/'
+  if (value === 'USD') return 'USD'
+  return formatCurrencyLabel(value)
 }
 
 function formatPercent(value) {
@@ -465,7 +380,7 @@ function formatPercent(value) {
   const n = Number(value)
   if (Number.isNaN(n)) return '--'
   const normalized = Math.abs(n) <= 1 ? n * 100 : n
-  return `${normalized.toLocaleString('en-US', {
+  return `${normalized.toLocaleString('es-PE', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   })}%`
@@ -474,9 +389,9 @@ function formatPercent(value) {
 function formatDate(value) {
   if (!value) return '--'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
+  if (Number.isNaN(date.getTime())) return String(value)
 
-  return new Intl.DateTimeFormat('en-CA', {
+  return new Intl.DateTimeFormat('es-PE', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit'
@@ -485,15 +400,6 @@ function formatDate(value) {
 
 function padInstallment(value) {
   return String(value ?? '--').padStart(2, '0')
-}
-
-function graceLabel(value) {
-  const map = {
-    TOTAL: 'Total',
-    PARTIAL: 'Gracia parcial',
-    NONE: 'Sin gracia'
-  }
-  return map[value] || formatGraceTypeLabel(value)
 }
 
 function chargeValue(charge) {
@@ -508,26 +414,13 @@ function originalAmountLabel(charge) {
   if (!charge || charge.originalAmount === null || charge.originalAmount === undefined || !charge.originalCurrency) {
     return ''
   }
+
   const displayCurrency = charge.currency || currency.value
   if (String(charge.originalCurrency) === String(displayCurrency)) {
     return ''
   }
 
   return formatMoney(charge.originalAmount, charge.originalCurrency)
-}
-
-function effectOfFinancing(mode) {
-  if (mode === 'FINANCED') return 'Se suma al principal'
-  if (mode === 'PAID_UPFRONT') return 'Pagado al contado'
-  if (mode === 'WITHHELD') return 'Retenido del desembolso'
-  return ''
-}
-
-function titleCase(value) {
-  return String(value)
-    .toLowerCase()
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
 
 watch(
@@ -660,11 +553,6 @@ onMounted(loadDetail)
 .action-btn.primary {
   background: #08264a;
   color: #ffffff;
-}
-
-.action-btn:disabled {
-  cursor: default;
-  opacity: 0.85;
 }
 
 .metric-grid {

@@ -95,6 +95,17 @@
                   {{ statusLabel(operation.status) }}
                 </span>
                 <button
+                  v-if="operation.status === 'SAVED'"
+                  class="qr-icon"
+                  type="button"
+                  title="Compartir operación"
+                  @click.stop="openShare(operation.identifier)"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 4h7v7H4V4zm2 2v3h3V6H6zm7-2h7v7h-7V4zm2 2v3h3V6h-3zM4 13h7v7H4v-7zm2 2v3h3v-3H6zm11 1h2v2h-2v-2zm-1 4h4v-4h2v6h-6v-2zm1-9h4v4h-2v-2h-2v-2z" fill="currentColor"/>
+                  </svg>
+                </button>
+                <button
                   class="arrow-icon"
                   type="button"
                   title="Ver detalle de operación"
@@ -161,9 +172,7 @@ const groupedOperations = computed(() => {
 
   visibleOperations.value.forEach((operation) => {
     const date = operation.createdAt ? new Date(operation.createdAt) : null
-    const key = date && !Number.isNaN(date.getTime())
-      ? date.toISOString().slice(0, 10)
-      : 'unknown'
+    const key = date && !Number.isNaN(date.getTime()) ? date.toISOString().slice(0, 10) : 'unknown'
 
     if (!groups.has(key)) {
       groups.set(key, {
@@ -222,7 +231,12 @@ function goToNewSimulation() {
 
 function openOperation(operationId) {
   if (!operationId) return
-  router.push(`/operation/${operationId}`)
+  router.push({ name: 'operation-detail', params: { id: operationId } })
+}
+
+function openShare(operationId) {
+  if (!operationId) return
+  router.push({ name: 'operation-share', params: { id: operationId } })
 }
 
 function exportCsv() {
@@ -258,7 +272,7 @@ function formatGroupLabel(date) {
   yesterday.setDate(today.getDate() - 1)
 
   const dateKey = date.toDateString()
-  const formatted = new Intl.DateTimeFormat('en-US', {
+  const formatted = new Intl.DateTimeFormat('es-PE', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
@@ -274,7 +288,7 @@ function formatTime(value) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return '--:--'
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('es-PE', {
     hour: '2-digit',
     minute: '2-digit'
   }).format(date)
@@ -373,6 +387,7 @@ onMounted(() => {
 .action-btn svg,
 .clear-btn svg,
 .arrow-icon svg,
+.qr-icon svg,
 .time svg {
   width: 16px;
   height: 16px;
@@ -578,6 +593,7 @@ onMounted(() => {
   color: #92400e;
 }
 
+.qr-icon,
 .arrow-icon {
   display: grid;
   place-items: center;
@@ -590,6 +606,7 @@ onMounted(() => {
   cursor: pointer;
 }
 
+.qr-icon:hover,
 .arrow-icon:hover {
   background: #edf4ff;
 }

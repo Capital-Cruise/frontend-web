@@ -46,7 +46,8 @@ const CHARGE_BASE_LABELS = {
   FINANCED_AMOUNT: 'Monto financiado',
   TOTAL_INSTALLMENT: 'Cuota total',
   BALLOON: 'Balloon',
-  NONE: 'No aplica'
+  NONE: 'No aplica',
+  '---': 'No aplica'
 }
 
 const FREQUENCY_LABELS = {
@@ -58,8 +59,7 @@ const FREQUENCY_LABELS = {
   ANNUAL: 'Anual',
   ONE_TIME: 'Una sola vez',
   ANNUAL_PRORATED_MONTHLY: 'Anual prorrateado mensualmente',
-  DAILY: 'Diaria',
-  Mensual: 'Mensual'
+  DAILY: 'Diaria'
 }
 
 const GRACE_TYPE_LABELS = {

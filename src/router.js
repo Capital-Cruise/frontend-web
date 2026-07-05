@@ -7,6 +7,8 @@ import SimulationView from './loans/pages/SimulationView.page.vue'
 import SimulationResultView from './loans/pages/SimulationResultView.page.vue'
 import OperationsView from './loans/pages/OperationsView.page.vue'
 import OperationDetailView from './loans/pages/OperationDetailView.page.vue'
+import OperationShareView from './loans/pages/OperationShareView.page.vue'
+import PublicQuoteView from './public/pages/PublicQuoteView.page.vue'
 import PageNotFound from './public/pages/PageNotFound.page.vue'
 import SupportView from './public/pages/SupportView.page.vue'
 
@@ -16,6 +18,17 @@ const routes = [
     name: 'login',
     component: LoginView,
     meta: { public: true }
+  },
+  {
+    path: '/quote/:shareToken',
+    name: 'public-quote',
+    component: PublicQuoteView,
+    props: true,
+    meta: {
+      public: true,
+      title: 'Compartir operación',
+      subtitle: 'Vista pública de una operación compartida.'
+    }
   },
   {
     path: '/',
@@ -56,7 +69,22 @@ const routes = [
         component: OperationsView,
         meta: { title: 'Operaciones guardadas', subtitle: 'Revisa las simulaciones financieras guardadas.' }
       },
-      { path: 'operation/:id', name: 'operation-detail', component: OperationDetailView, props: true },
+      {
+        path: 'operations/:id',
+        name: 'operation-detail',
+        alias: 'operation/:id',
+        component: OperationDetailView,
+        props: true,
+        meta: { title: 'Detalle de operación', subtitle: 'Consulta la operación financiera guardada.' }
+      },
+      {
+        path: 'operations/:id/share',
+        name: 'operation-share',
+        alias: 'operation/:id/share',
+        component: OperationShareView,
+        props: true,
+        meta: { title: 'Compartir operación', subtitle: 'Genera y comparte el enlace público de la operación.' }
+      },
       {
         path: 'support',
         name: 'support',

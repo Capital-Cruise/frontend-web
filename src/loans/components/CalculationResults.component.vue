@@ -8,7 +8,6 @@
       <div class="button-row">
         <button class="secondary" @click="$emit('back')">Volver al formulario</button>
         <button class="primary" @click="$emit('save')">Guardar operación</button>
-        <button class="secondary" @click="$emit('share')">Compartir operación guardada</button>
       </div>
     </div>
 
@@ -148,7 +147,7 @@ const props = defineProps({
   request: { type: Object, default: null }
 })
 
-defineEmits(['back', 'save', 'share'])
+defineEmits(['back', 'save'])
 
 const calc = computed(() => props.calculation?.calculation || props.calculation || {})
 const summary = computed(() => calc.value?.summary || props.calculation?.summary || {})
