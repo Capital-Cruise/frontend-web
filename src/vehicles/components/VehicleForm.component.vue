@@ -2,16 +2,16 @@
   <div class="register-page">
     <header class="register-header">
       <nav class="breadcrumb" aria-label="Breadcrumb">
-        <button type="button" class="crumb-link" @click="$emit('cancel')">Veh?culos</button>
-        <span class="crumb-separator">?</span>
-        <span class="crumb-current">{{ isEdit ? 'Edici?n' : 'Registro' }}</span>
+        <button type="button" class="crumb-link" @click="$emit('cancel')">Vehículos</button>
+        <span class="crumb-separator">›</span>
+        <span class="crumb-current">{{ isEdit ? 'Edición' : 'Registro' }}</span>
       </nav>
-      <h1>{{ isEdit ? 'Editar veh?culo' : 'Registrar nuevo veh?culo' }}</h1>
+      <h1>{{ isEdit ? 'Editar vehículo' : 'Registrar nuevo vehículo' }}</h1>
       <p>
         {{
           isEdit
-            ? 'Actualiza las especificaciones del activo y su valorizaci?n para mantener el portafolio alineado con el mercado.'
-            : 'Registra un nuevo activo en el portafolio con su perfil t?cnico y valorizaci?n comercial para simulaciones de cr?dito.'
+            ? 'Actualiza las especificaciones del activo y su valorización para mantener el portafolio alineado con el mercado.'
+            : 'Registra un nuevo activo en el portafolio con su perfil técnico y valorización comercial para simulaciones de crédito.'
         }}
       </p>
     </header>
@@ -36,13 +36,13 @@
             <input v-model="form.model" placeholder="Ej. Taycan" required />
           </FieldHelp>
           <FieldHelp topic="vehicleYear">
-            <template #label>A?o</template>
+            <template #label>Año</template>
             <input v-model.number="form.year" type="number" min="1990" max="2035" required />
           </FieldHelp>
           <FieldHelp topic="vehicleType">
-            <template #label>Tipo de veh?culo</template>
+            <template #label>Tipo de vehículo</template>
             <select v-model="form.vehicleType">
-              <option value="SEDAN">Sed?n deportivo</option>
+              <option value="SEDAN">Sedán deportivo</option>
               <option value="SUV">SUV</option>
               <option value="PICKUP">Pick-up</option>
               <option value="HATCHBACK">Hatchback</option>
@@ -60,12 +60,12 @@
               <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="currentColor" />
             </svg>
           </span>
-          <h2>Imagen y descripci?n</h2>
+          <h2>Imagen y descripción</h2>
         </div>
         <div class="field-grid">
           <FieldHelp topic="vehicleDescription" class="full-width">
-            <template #label>Descripci?n</template>
-            <textarea v-model="form.description" placeholder="Notas t?cnicas, versi?n, condici?n..." />
+            <template #label>Descripción</template>
+            <textarea v-model="form.description" placeholder="Notas técnicas, versión, condición..." />
           </FieldHelp>
           <FieldHelp topic="vehicleImageUrl" class="full-width">
             <template #label>URL de imagen</template>
@@ -81,7 +81,7 @@
               <path d="M3.5 18.5 9 13l3 3 7.5-7.5L22 12.5 12 22.5 3.5 18.5z" fill="currentColor" />
             </svg>
           </span>
-          <h2>Valorizaci?n comercial</h2>
+          <h2>Valorización comercial</h2>
         </div>
         <div class="field-grid">
           <FieldHelp topic="vehicleCommercialPrice">
@@ -107,7 +107,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M17 3H5a2 2 0 0 0-2 2v14l4-4h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12H6.17L3 17.17V5h14v10z" fill="currentColor" />
           </svg>
-          {{ loading ? 'Guardando...' : isEdit ? 'Actualizar veh?culo' : 'Guardar veh?culo' }}
+          {{ loading ? 'Guardando...' : isEdit ? 'Actualizar vehículo' : 'Guardar vehículo' }}
         </button>
       </footer>
 

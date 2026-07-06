@@ -3,7 +3,7 @@
     <div class="layout-quote">
       <div class="left-stack">
         <section class="card">
-          <h2><span class="section-icon">01</span>Selecci?n de cliente y veh?culo</h2>
+          <h2><span class="section-icon">01</span>Selección de cliente y vehículo</h2>
           <div class="two-cols">
             <FieldHelp topic="simulationClient">
               <template #label>Cliente</template>
@@ -14,10 +14,10 @@
               </select>
             </FieldHelp>
             <FieldHelp topic="simulationVehicle">
-              <template #label>Veh?culo</template>
+              <template #label>Vehículo</template>
               <select v-model="selectedVehicleId" required>
                 <option v-for="v in vehicles" :key="v.identifier" :value="v.identifier">
-                  {{ v.displayName }} ? {{ formatMoney(v.price, v.currency) }}
+                  {{ v.displayName }} · {{ formatMoney(v.price, v.currency) }}
                 </option>
               </select>
             </FieldHelp>
@@ -25,10 +25,10 @@
         </section>
 
         <section class="card">
-          <h2><span class="section-icon">02</span>Estructura del cr?dito</h2>
+          <h2><span class="section-icon">02</span>Estructura del crédito</h2>
           <div class="two-cols">
             <FieldHelp topic="operationCurrency">
-              <template #label>Moneda de la operaci?n</template>
+              <template #label>Moneda de la operación</template>
               <div class="segmented-control">
                 <button
                   v-for="currency in currencyOptions"
@@ -42,7 +42,7 @@
               </div>
             </FieldHelp>
             <FieldHelp topic="vehiclePrice">
-              <template #label>Precio del veh?culo</template>
+              <template #label>Precio del vehículo</template>
               <input type="number" step="0.01" v-model.number="vehiclePrice" />
             </FieldHelp>
             <FieldHelp topic="downPaymentMode">
@@ -70,12 +70,12 @@
             </FieldHelp>
           </div>
           <p class="hint">
-            Valores predeterminados del backend: m?todo franc?s vencido ordinario, periodicidad mensual, gracia ordinaria y base comercial 30/360.
+            Valores predeterminados del backend: método francés vencido ordinario, periodicidad mensual, gracia ordinaria y base comercial 30/360.
           </p>
         </section>
 
         <section class="card">
-          <h2><span class="section-icon">03</span>Configuraci?n de tasa</h2>
+          <h2><span class="section-icon">03</span>Configuración de tasa</h2>
           <div class="two-cols">
             <FieldHelp topic="rateType">
               <template #label>Tipo de tasa</template>
@@ -96,7 +96,7 @@
               </select>
             </FieldHelp>
             <FieldHelp v-show="rate.rateType === 'NOMINAL'" topic="capitalizationFrequency">
-              <template #label>Frecuencia de capitalizaci?n</template>
+              <template #label>Frecuencia de capitalización</template>
               <select v-model="rate.capitalizationFrequency">
                 <option value="MONTHLY">Mensual</option>
                 <option value="DAILY">Diaria</option>
@@ -158,7 +158,7 @@
               <FieldHelp topic="balloonBase">
                 <template #label>Base de la cuota balloon</template>
                 <select v-model="balloon.balloonBase">
-                  <option value="VEHICLE_PRICE">Precio del veh?culo</option>
+                  <option value="VEHICLE_PRICE">Precio del vehículo</option>
                   <option value="PRINCIPAL_FINANCED">Principal financiado</option>
                 </select>
               </FieldHelp>
@@ -180,7 +180,7 @@
               </select>
             </FieldHelp>
             <FieldHelp v-show="grace.graceType !== 'NONE'" topic="gracePeriods">
-              <template #label>Duraci?n en meses</template>
+              <template #label>Duración en meses</template>
               <input type="number" min="0" v-model.number="grace.gracePeriods" />
             </FieldHelp>
           </section>
@@ -190,7 +190,7 @@
           <div class="section-head">
             <div>
               <h2>Cargos iniciales</h2>
-              <p class="section-note">Costos aplicados al inicio de la operaci?n.</p>
+              <p class="section-note">Costos aplicados al inicio de la operación.</p>
             </div>
             <button type="button" class="secondary" @click="addInitialCharge">Agregar cargo inicial</button>
           </div>
@@ -198,7 +198,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>C?digo</th>
+                  <th>Código</th>
                   <th>Nombre</th>
                   <th>Monto</th>
                   <th>Modo</th>
@@ -227,16 +227,16 @@
         <section class="card">
           <div class="section-head">
             <div>
-              <h2>Cargos peri?dicos</h2>
+              <h2>Cargos periódicos</h2>
               <p class="section-note">Conceptos recurrentes que incrementan la cuota total.</p>
             </div>
-            <button type="button" class="secondary" @click="addPeriodicCharge">Agregar cargo peri?dico</button>
+            <button type="button" class="secondary" @click="addPeriodicCharge">Agregar cargo periódico</button>
           </div>
           <div class="mini-table">
             <table>
               <thead>
                 <tr>
-                  <th>C?digo</th>
+                  <th>Código</th>
                   <th>Nombre</th>
                   <th>Tipo</th>
                   <th>Valor</th>
@@ -262,14 +262,14 @@
                 </tr>
               </tbody>
             </table>
-            <p v-if="periodicCharges.length === 0">No hay cargos peri?dicos agregados.</p>
+            <p v-if="periodicCharges.length === 0">No hay cargos periódicos agregados.</p>
           </div>
         </section>
       </div>
 
       <aside class="right-rail">
         <section class="summary-panel card dark-card">
-          <h2>Resumen de la simulaci?n</h2>
+          <h2>Resumen de la simulación</h2>
           <div class="summary-metric">
             <span>Cuota mensual estimada</span>
             <strong>{{ summaryMonthlyInstallment }}</strong>
@@ -287,7 +287,7 @@
           <button class="primary light full" type="submit" :disabled="calculating">
             {{ calculating ? 'Calculando...' : 'Calcular' }}
           </button>
-          <button class="danger full" type="button" @click="handleReset">Reiniciar simulaci?n</button>
+          <button class="danger full" type="button" @click="handleReset">Reiniciar simulación</button>
         </section>
 
         <section class="side-card exchange-card">
@@ -304,12 +304,12 @@
           <button class="exchange-refresh" type="button" :disabled="loadingExchange" @click="loadCurrentExchangeRate">
             {{ loadingExchange ? 'Actualizando...' : 'Actualizar tipo de cambio' }}
           </button>
-          <p>Valor manual usado para c?lculos de cotizaci?n entre monedas distintas.</p>
+          <p>Valor manual usado para cálculos de cotización entre monedas distintas.</p>
         </section>
 
         <section class="side-card advisor-tip">
-          <strong>Recomendaci?n</strong>
-          <p>Completa los datos del cr?dito y calcula la cotizaci?n para obtener los indicadores financieros.</p>
+          <strong>Recomendación</strong>
+          <p>Completa los datos del crédito y calcula la cotización para obtener los indicadores financieros.</p>
         </section>
       </aside>
     </div>
@@ -319,7 +319,7 @@
         <h2>Cargo inicial</h2>
         <div class="two-cols">
           <FieldHelp topic="initialChargeCode">
-            <template #label>C?digo del cargo</template>
+            <template #label>Código del cargo</template>
             <select v-model="editingInitialCharge.code">
               <option v-for="code in initialChargeCodes" :key="code" :value="code">
                 {{ formatChargeCodeLabel(code) }}
@@ -367,10 +367,10 @@
 
     <dialog ref="periodicChargeDialog" class="dialog">
       <form class="dialog-form" @submit.prevent="savePeriodicCharge">
-        <h2>Cargo peri?dico</h2>
+        <h2>Cargo periódico</h2>
         <div class="two-cols">
           <FieldHelp topic="periodicChargeCode">
-            <template #label>C?digo del cargo</template>
+            <template #label>Código del cargo</template>
             <select v-model="editingPeriodicCharge.code">
               <option v-for="code in periodicChargeCodes" :key="code" :value="code">
                 {{ formatChargeCodeLabel(code) }}

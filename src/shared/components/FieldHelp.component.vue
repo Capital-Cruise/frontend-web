@@ -5,6 +5,7 @@
     class="field-help"
     :class="[`field-help--${layout}`, { 'field-help--open': isOpen }]"
     @mouseenter="onMouseEnter"
+    @mousemove="onMouseMove"
     @mouseleave="onMouseLeave"
     @focusin="onFocusIn"
     @focusout="onFocusOut"
@@ -61,6 +62,7 @@ const rootRef = ref(null)
 const tooltipRef = ref(null)
 const isOpen = ref(false)
 const tooltipStyle = ref({})
+const anchorPoint = ref({ x: 0, y: 0 })
 
 const openTimer = ref(null)
 const closeTimer = ref(null)
@@ -79,11 +81,15 @@ function updatePosition() {
 
   const rect = root.getBoundingClientRect()
   const width = Math.min(320, Math.max(248, rect.width))
-  const left = Math.min(window.innerWidth - width - 16, Math.max(16, rect.left))
-  let top = rect.bottom + 12
+  let left = anchorPoint.value.x ? anchorPoint.value.x + 16 : rect.left
+  let top = anchorPoint.value.y ? anchorPoint.value.y + 16 : rect.bottom + 12
+
+  if (left + width + 16 > window.innerWidth) {
+    left = Math.max(16, (anchorPoint.value.x || rect.right) - width - 16)
+  }
 
   if (top + 180 > window.innerHeight) {
-    top = Math.max(16, rect.top - 168)
+    top = Math.max(16, (anchorPoint.value.y || rect.top) - 168)
   }
 
   tooltipStyle.value = {
@@ -148,7 +154,15 @@ function queueClose() {
 
 function onMouseEnter(event) {
   if (event.pointerType === 'touch') return
+  anchorPoint.value = { x: event.clientX, y: event.clientY }
   scheduleOpen()
+}
+
+function onMouseMove(event) {
+  anchorPoint.value = { x: event.clientX, y: event.clientY }
+  if (isOpen.value) {
+    updatePosition()
+  }
 }
 
 function onMouseLeave(event) {
@@ -161,6 +175,11 @@ function onMouseLeave(event) {
 }
 
 function onFocusIn() {
+  const root = rootRef.value?.$el || rootRef.value
+  const rect = root?.getBoundingClientRect?.()
+  if (rect) {
+    anchorPoint.value = { x: rect.left, y: rect.bottom }
+  }
   openTooltip()
 }
 
