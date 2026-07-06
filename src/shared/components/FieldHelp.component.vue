@@ -4,22 +4,22 @@
     ref="rootRef"
     class="field-help"
     :class="[`field-help--${layout}`, { 'field-help--open': isOpen }]"
-    @mouseenter="onMouseEnter"
-    @mousemove="onMouseMove"
-    @mouseleave="onMouseLeave"
-    @focusin="onFocusIn"
-    @focusout="onFocusOut"
   >
     <div class="field-help__header">
       <span class="field-help__label">
         <slot name="label">{{ helpEntry.title }}</slot>
       </span>
       <button
+        ref="iconRef"
         type="button"
         class="field-help__icon"
         :aria-expanded="isOpen"
         :aria-controls="tooltipId"
         aria-label="Mostrar ayuda contextual"
+        @mouseenter="scheduleOpen"
+        @mouseleave="queueClose"
+        @focus="openTooltip"
+        @blur="queueClose"
         @click.stop="toggleFromIcon"
       >
         ?
@@ -37,7 +37,7 @@
         role="tooltip"
         :style="tooltipStyle"
         @mouseenter="cancelClose"
-        @mouseleave="closeTooltip"
+        @mouseleave="queueClose"
       >
         <strong>{{ helpEntry.title }}</strong>
         <p>{{ helpEntry.description }}</p>
@@ -59,10 +59,10 @@ const props = defineProps({
 })
 
 const rootRef = ref(null)
+const iconRef = ref(null)
 const tooltipRef = ref(null)
 const isOpen = ref(false)
 const tooltipStyle = ref({})
-const anchorPoint = ref({ x: 0, y: 0 })
 
 const openTimer = ref(null)
 const closeTimer = ref(null)
@@ -76,20 +76,20 @@ function clearTimers() {
 }
 
 function updatePosition() {
-  const root = rootRef.value?.$el || rootRef.value
-  if (!root) return
+  const icon = iconRef.value
+  if (!icon) return
 
-  const rect = root.getBoundingClientRect()
-  const width = Math.min(320, Math.max(248, rect.width))
-  let left = anchorPoint.value.x ? anchorPoint.value.x + 16 : rect.left
-  let top = anchorPoint.value.y ? anchorPoint.value.y + 16 : rect.bottom + 12
+  const rect = icon.getBoundingClientRect()
+  const width = 320
+  let left = Math.max(16, rect.left)
+  let top = rect.bottom + 10
 
   if (left + width + 16 > window.innerWidth) {
-    left = Math.max(16, (anchorPoint.value.x || rect.right) - width - 16)
+    left = Math.max(16, rect.right - width)
   }
 
   if (top + 180 > window.innerHeight) {
-    top = Math.max(16, (anchorPoint.value.y || rect.top) - 168)
+    top = Math.max(16, rect.top - 180)
   }
 
   tooltipStyle.value = {
@@ -142,49 +142,15 @@ function queueClose() {
   closeTimer.value = window.setTimeout(() => {
     const root = rootRef.value?.$el || rootRef.value
     const tooltip = tooltipRef.value
+    const icon = iconRef.value
     const active = document.activeElement
 
-    if (root?.contains(active) || tooltip?.contains(active)) {
+    if (root?.contains(active) || tooltip?.contains(active) || icon?.contains(active)) {
       return
     }
 
     closeTooltip()
-  }, 80)
-}
-
-function onMouseEnter(event) {
-  if (event.pointerType === 'touch') return
-  anchorPoint.value = { x: event.clientX, y: event.clientY }
-  scheduleOpen()
-}
-
-function onMouseMove(event) {
-  anchorPoint.value = { x: event.clientX, y: event.clientY }
-  if (isOpen.value) {
-    updatePosition()
-  }
-}
-
-function onMouseLeave(event) {
-  const nextTarget = event.relatedTarget
-  const tooltip = tooltipRef.value
-  if (tooltip && nextTarget instanceof Node && tooltip.contains(nextTarget)) {
-    return
-  }
-  closeTooltip()
-}
-
-function onFocusIn() {
-  const root = rootRef.value?.$el || rootRef.value
-  const rect = root?.getBoundingClientRect?.()
-  if (rect) {
-    anchorPoint.value = { x: rect.left, y: rect.bottom }
-  }
-  openTooltip()
-}
-
-function onFocusOut() {
-  queueClose()
+  }, 120)
 }
 
 function toggleFromIcon() {
