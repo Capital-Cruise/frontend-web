@@ -1,25 +1,34 @@
 <template>
   <form class="simulation-form" @submit.prevent="handleCalculate">
     <div class="layout-quote">
-      <div class="left-stack">        <!-- Selección de cliente y vehículo -->
-        <section class="card">          <h2><span class="section-icon">01</span>Selección de cliente y vehículo</h2>
+      <div class="left-stack">
+        <section class="card">
+          <h2><span class="section-icon">01</span>Selecci?n de cliente y veh?culo</h2>
           <div class="two-cols">
-            <label>Cliente
+            <FieldHelp topic="simulationClient">
+              <template #label>Cliente</template>
               <select v-model="selectedClientId" required>
                 <option v-for="c in clients" :key="c.identifier" :value="c.identifier">
                   {{ c.displayName }}
                 </option>
               </select>
-            </label>            <label>Vehículo
+            </FieldHelp>
+            <FieldHelp topic="simulationVehicle">
+              <template #label>Veh?culo</template>
               <select v-model="selectedVehicleId" required>
-                <option v-for="v in vehicles" :key="v.identifier" :value="v.identifier">                  {{ v.displayName }} · {{ formatMoney(v.price, v.currency) }}
+                <option v-for="v in vehicles" :key="v.identifier" :value="v.identifier">
+                  {{ v.displayName }} ? {{ formatMoney(v.price, v.currency) }}
                 </option>
               </select>
-            </label>
+            </FieldHelp>
           </div>
-        </section>        <!-- Estructura del crédito -->
-        <section class="card">          <h2><span class="section-icon">02</span>Estructura del crédito</h2>
-          <div class="two-cols">            <label>Moneda de la operación
+        </section>
+
+        <section class="card">
+          <h2><span class="section-icon">02</span>Estructura del cr?dito</h2>
+          <div class="two-cols">
+            <FieldHelp topic="operationCurrency">
+              <template #label>Moneda de la operaci?n</template>
               <div class="segmented-control">
                 <button
                   v-for="currency in currencyOptions"
@@ -31,46 +40,63 @@
                   {{ currency }}
                 </button>
               </div>
-            </label>            <label>Precio del vehículo
+            </FieldHelp>
+            <FieldHelp topic="vehiclePrice">
+              <template #label>Precio del veh?culo</template>
               <input type="number" step="0.01" v-model.number="vehiclePrice" />
-            </label>
-            <label>Modo de cuota inicial
+            </FieldHelp>
+            <FieldHelp topic="downPaymentMode">
+              <template #label>Modo de cuota inicial</template>
               <select v-model="downPaymentMode">
                 <option value="percent">Porcentaje</option>
                 <option value="amount">Monto</option>
               </select>
-            </label>
-            <label v-show="downPaymentMode === 'percent'">Cuota inicial en porcentaje
+            </FieldHelp>
+            <FieldHelp v-show="downPaymentMode === 'percent'" topic="downPaymentPercent">
+              <template #label>Cuota inicial en porcentaje</template>
               <input type="number" step="0.01" v-model.number="downPaymentPercent" />
-            </label>
-            <label v-show="downPaymentMode === 'amount'">Cuota inicial en monto
+            </FieldHelp>
+            <FieldHelp v-show="downPaymentMode === 'amount'" topic="downPaymentAmount">
+              <template #label>Cuota inicial en monto</template>
               <input type="number" step="0.01" v-model.number="downPaymentAmount" />
-            </label>
-            <label>Plazo en meses
+            </FieldHelp>
+            <FieldHelp topic="termMonths">
+              <template #label>Plazo en meses</template>
               <input type="number" min="1" v-model.number="loan.termMonths" @change="updateDueInstallment" />
-            </label>
-            <label>Fecha de inicio
+            </FieldHelp>
+            <FieldHelp topic="startDate">
+              <template #label>Fecha de inicio</template>
               <input type="date" v-model="loan.startDate" />
-            </label>
-          </div>          <p class="hint">Valores predeterminados del backend: método francés vencido ordinario, periodicidad mensual, gracia ordinaria y base comercial 30/360.</p>
-        </section>        <!-- Configuración de tasa -->
-        <section class="card">          <h2><span class="section-icon">03</span>Configuración de tasa</h2>
+            </FieldHelp>
+          </div>
+          <p class="hint">
+            Valores predeterminados del backend: m?todo franc?s vencido ordinario, periodicidad mensual, gracia ordinaria y base comercial 30/360.
+          </p>
+        </section>
+
+        <section class="card">
+          <h2><span class="section-icon">03</span>Configuraci?n de tasa</h2>
           <div class="two-cols">
-            <label>Tipo de tasa
+            <FieldHelp topic="rateType">
+              <template #label>Tipo de tasa</template>
               <select v-model="rate.rateType">
                 <option value="EFFECTIVE">Efectiva</option>
                 <option value="NOMINAL">Nominal</option>
               </select>
-            </label>
-            <label>Valor de la tasa (%)
+            </FieldHelp>
+            <FieldHelp topic="rateValue">
+              <template #label>Valor de la tasa (%)</template>
               <input type="number" step="0.01" v-model.number="rate.rateValue" />
-            </label>
-            <label>Periodo de la tasa
+            </FieldHelp>
+            <FieldHelp topic="ratePeriod">
+              <template #label>Periodo de la tasa</template>
               <select v-model="rate.ratePeriod">
                 <option value="ANNUAL">Anual</option>
                 <option value="MONTHLY">Mensual</option>
               </select>
-            </label>            <label v-show="rate.rateType === 'NOMINAL'">Frecuencia de capitalización
+            </FieldHelp>
+            <FieldHelp v-show="rate.rateType === 'NOMINAL'" topic="capitalizationFrequency">
+              <template #label>Frecuencia de capitalizaci?n</template>
               <select v-model="rate.capitalizationFrequency">
                 <option value="MONTHLY">Mensual</option>
                 <option value="DAILY">Diaria</option>
@@ -78,129 +104,172 @@
                 <option value="SEMI_ANNUAL">Semestral</option>
                 <option value="ANNUAL">Anual</option>
               </select>
-            </label>
-            <label>Tipo de tasa de descuento
+            </FieldHelp>
+            <FieldHelp topic="discountRateType">
+              <template #label>Tipo de tasa de descuento</template>
               <select v-model="financialEvaluation.discountRateType">
                 <option value="EFFECTIVE">Efectiva</option>
               </select>
-            </label>
-            <label>Periodo de la tasa de descuento
+            </FieldHelp>
+            <FieldHelp topic="discountRatePeriod">
+              <template #label>Periodo de la tasa de descuento</template>
               <select v-model="financialEvaluation.discountRatePeriod">
                 <option value="ANNUAL">Anual</option>
                 <option value="MONTHLY">Mensual</option>
               </select>
-            </label>
-            <label>COK / valor de la tasa de descuento (%)
+            </FieldHelp>
+            <FieldHelp topic="discountRateValue">
+              <template #label>COK / valor de la tasa de descuento (%)</template>
               <input type="number" step="0.01" v-model.number="financialEvaluation.discountRateValue" />
-            </label>
-            <label>Tipo de cambio
+            </FieldHelp>
+            <FieldHelp topic="exchangeRateValue">
+              <template #label>Tipo de cambio</template>
               <input type="number" step="0.0001" v-model.number="exchangeRate.value" />
-            </label>
+            </FieldHelp>
           </div>
         </section>
 
-        <!-- Cuota balloon y periodo de gracia -->
         <div class="two-card-row">
           <section class="card">
             <h2>Cuota balloon</h2>
-            <label>Habilitado
+            <FieldHelp topic="balloonEnabled">
+              <template #label>Habilitado</template>
               <select v-model="balloon.enabled">
                 <option :value="false">Deshabilitado</option>
                 <option :value="true">Habilitado</option>
               </select>
-            </label>
+            </FieldHelp>
             <div v-show="balloon.enabled" id="balloonFields">
-              <label>Modo
+              <FieldHelp topic="balloonMode">
+                <template #label>Modo</template>
                 <select v-model="balloonMode">
                   <option value="percent">Porcentaje</option>
                   <option value="amount">Monto</option>
                 </select>
-              </label>
-              <label v-show="balloonMode === 'percent'">Cuota balloon en porcentaje
+              </FieldHelp>
+              <FieldHelp v-show="balloonMode === 'percent'" topic="balloonPercent">
+                <template #label>Cuota balloon en porcentaje</template>
                 <input type="number" step="0.01" v-model.number="balloon.balloonPercent" />
-              </label>
-              <label v-show="balloonMode === 'amount'">Cuota balloon en monto
+              </FieldHelp>
+              <FieldHelp v-show="balloonMode === 'amount'" topic="balloonAmount">
+                <template #label>Cuota balloon en monto</template>
                 <input type="number" step="0.01" v-model.number="balloon.balloonAmount" />
-              </label>
-              <label>Base de la cuota balloon
-                <select v-model="balloon.balloonBase">                  <option value="VEHICLE_PRICE">Precio del vehículo</option>
+              </FieldHelp>
+              <FieldHelp topic="balloonBase">
+                <template #label>Base de la cuota balloon</template>
+                <select v-model="balloon.balloonBase">
+                  <option value="VEHICLE_PRICE">Precio del veh?culo</option>
                   <option value="PRINCIPAL_FINANCED">Principal financiado</option>
                 </select>
-              </label>
-              <label>Cuota de vencimiento
+              </FieldHelp>
+              <FieldHelp topic="balloonDueInstallment">
+                <template #label>Cuota de vencimiento</template>
                 <input type="number" v-model.number="balloon.dueInstallment" />
-              </label>
+              </FieldHelp>
             </div>
           </section>
+
           <section class="card">
             <h2>Periodo de gracia</h2>
-            <label>Tipo
+            <FieldHelp topic="graceType">
+              <template #label>Tipo</template>
               <select v-model="grace.graceType">
                 <option value="NONE">Sin gracia</option>
                 <option value="PARTIAL">Gracia parcial</option>
                 <option value="TOTAL">Gracia total</option>
               </select>
-            </label>            <label v-show="grace.graceType !== 'NONE'">Duración en meses
+            </FieldHelp>
+            <FieldHelp v-show="grace.graceType !== 'NONE'" topic="gracePeriods">
+              <template #label>Duraci?n en meses</template>
               <input type="number" min="0" v-model.number="grace.gracePeriods" />
-            </label>
+            </FieldHelp>
           </section>
         </div>
 
-        <!-- Cargos iniciales -->
         <section class="card">
           <div class="section-head">
-            <h2>Cargos iniciales</h2>
+            <div>
+              <h2>Cargos iniciales</h2>
+              <p class="section-note">Costos aplicados al inicio de la operaci?n.</p>
+            </div>
             <button type="button" class="secondary" @click="addInitialCharge">Agregar cargo inicial</button>
           </div>
           <div class="mini-table">
             <table>
-              <thead>              <tr><th>Código</th><th>Nombre</th><th>Monto</th><th>Modo</th><th>Acciones</th></tr>
+              <thead>
+                <tr>
+                  <th>C?digo</th>
+                  <th>Nombre</th>
+                  <th>Monto</th>
+                  <th>Modo</th>
+                  <th>Efecto</th>
+                  <th>Acciones</th>
+                </tr>
               </thead>
               <tbody>
-              <tr v-for="(charge, index) in initialCharges" :key="index">
-                <td>{{ formatChargeCodeLabel(charge.code) }}</td>
-                <td>{{ charge.label }}</td>
-                <td>{{ formatMoney(charge.amount, charge.currency) }}</td>
-                <td>{{ formatFinancingModeLabel(charge.financingMode) }}</td>
-                <td>
-                  <button type="button" class="secondary small" @click="editInitialCharge(index)">Editar</button>
-                  <button type="button" class="danger small" @click="removeInitialCharge(index)">Eliminar</button>
-                </td>
-              </tr>
+                <tr v-for="(charge, index) in initialCharges" :key="index">
+                  <td>{{ formatChargeCodeLabel(charge.code) }}</td>
+                  <td>{{ charge.label }}</td>
+                  <td>{{ formatMoney(charge.amount, charge.currency) }}</td>
+                  <td>{{ formatFinancingModeLabel(charge.financingMode) }}</td>
+                  <td>{{ formatChargeEffectLabel(charge.financingMode) }}</td>
+                  <td>
+                    <button type="button" class="secondary small" @click="editInitialCharge(index)">Editar</button>
+                    <button type="button" class="danger small" @click="removeInitialCharge(index)">Eliminar</button>
+                  </td>
+                </tr>
               </tbody>
             </table>
             <p v-if="initialCharges.length === 0">No hay cargos iniciales agregados.</p>
           </div>
-        </section>        <!-- Cargos periódicos -->
+        </section>
+
         <section class="card">
-          <div class="section-head">            <h2>Cargos periódicos</h2>            <button type="button" class="secondary" @click="addPeriodicCharge">Agregar cargo periódico</button>
+          <div class="section-head">
+            <div>
+              <h2>Cargos peri?dicos</h2>
+              <p class="section-note">Conceptos recurrentes que incrementan la cuota total.</p>
+            </div>
+            <button type="button" class="secondary" @click="addPeriodicCharge">Agregar cargo peri?dico</button>
           </div>
           <div class="mini-table">
             <table>
-              <thead>              <tr><th>Código</th><th>Nombre</th><th>Tipo</th><th>Valor</th><th>Base</th><th>Frecuencia</th><th>Rango</th><th>Acciones</th></tr>
+              <thead>
+                <tr>
+                  <th>C?digo</th>
+                  <th>Nombre</th>
+                  <th>Tipo</th>
+                  <th>Valor</th>
+                  <th>Base</th>
+                  <th>Frecuencia</th>
+                  <th>Rango</th>
+                  <th>Acciones</th>
+                </tr>
               </thead>
               <tbody>
-              <tr v-for="(charge, index) in periodicCharges" :key="index">
-                <td>{{ formatChargeCodeLabel(charge.code) }}</td>
-                <td>{{ charge.label }}</td>
-                <td>{{ formatChargeTypeLabel(charge.chargeType) }}</td>
-                <td>{{ charge.chargeType === 'FIXED_AMOUNT' ? formatMoney(charge.amount, charge.currency) : formatPercent(charge.ratePercent) }}</td>
-                <td>{{ formatChargeBaseLabel(charge.rateBase) }}</td>
-                <td>{{ formatFrequencyLabel(charge.frequency) }}</td>
-                <td>{{ formatInstallmentRangeLabel(charge.fromInstallment, charge.toInstallment) }}</td>
-                <td>
-                  <button type="button" class="secondary small" @click="editPeriodicCharge(index)">Editar</button>
-                  <button type="button" class="danger small" @click="removePeriodicCharge(index)">Eliminar</button>
-                </td>
-              </tr>
+                <tr v-for="(charge, index) in periodicCharges" :key="index">
+                  <td>{{ formatChargeCodeLabel(charge.code) }}</td>
+                  <td>{{ charge.label }}</td>
+                  <td>{{ formatChargeTypeLabel(charge.chargeType) }}</td>
+                  <td>{{ charge.chargeType === 'FIXED_AMOUNT' ? formatMoney(charge.amount, charge.currency) : formatPercent(charge.ratePercent) }}</td>
+                  <td>{{ formatChargeBaseLabel(charge.rateBase) }}</td>
+                  <td>{{ formatFrequencyLabel(charge.frequency) }}</td>
+                  <td>{{ formatInstallmentRangeLabel(charge.fromInstallment, charge.toInstallment) }}</td>
+                  <td>
+                    <button type="button" class="secondary small" @click="editPeriodicCharge(index)">Editar</button>
+                    <button type="button" class="danger small" @click="removePeriodicCharge(index)">Eliminar</button>
+                  </td>
+                </tr>
               </tbody>
-            </table>            <p v-if="periodicCharges.length === 0">No hay cargos periódicos agregados.</p>
+            </table>
+            <p v-if="periodicCharges.length === 0">No hay cargos peri?dicos agregados.</p>
           </div>
         </section>
       </div>
 
       <aside class="right-rail">
-        <section class="summary-panel card dark-card">          <h2>Resumen de la simulación</h2>
+        <section class="summary-panel card dark-card">
+          <h2>Resumen de la simulaci?n</h2>
           <div class="summary-metric">
             <span>Cuota mensual estimada</span>
             <strong>{{ summaryMonthlyInstallment }}</strong>
@@ -218,7 +287,7 @@
           <button class="primary light full" type="submit" :disabled="calculating">
             {{ calculating ? 'Calculando...' : 'Calcular' }}
           </button>
-          <button class="danger full" type="button" @click="handleReset">Reiniciar simulación</button>
+          <button class="danger full" type="button" @click="handleReset">Reiniciar simulaci?n</button>
         </section>
 
         <section class="side-card exchange-card">
@@ -246,106 +315,131 @@
     </div>
 
     <dialog ref="initialChargeDialog" class="dialog">
-      <form class="dialog-form" @submit.prevent="saveInitialCharge">        <h2>Cargo inicial</h2>
-        <div class="two-cols">          <label>Código del cargo
+      <form class="dialog-form" @submit.prevent="saveInitialCharge">
+        <h2>Cargo inicial</h2>
+        <div class="two-cols">
+          <FieldHelp topic="initialChargeCode">
+            <template #label>C?digo del cargo</template>
             <select v-model="editingInitialCharge.code">
               <option v-for="code in initialChargeCodes" :key="code" :value="code">
                 {{ formatChargeCodeLabel(code) }}
               </option>
             </select>
-          </label>
-          <label>Nombre
+          </FieldHelp>
+          <FieldHelp topic="initialChargeName">
+            <template #label>Nombre</template>
             <input v-model="editingInitialCharge.label" required />
-          </label>
-          <label>Monto
+          </FieldHelp>
+          <FieldHelp topic="initialChargeAmount">
+            <template #label>Monto</template>
             <input type="number" min="0" step="0.01" v-model.number="editingInitialCharge.amount" required />
-          </label>
-          <label>Moneda
+          </FieldHelp>
+          <FieldHelp topic="initialChargeCurrency">
+            <template #label>Moneda</template>
             <select v-model="editingInitialCharge.currency">
               <option v-for="currency in currencyOptions" :key="currency" :value="currency">
                 {{ formatCurrencyLabel(currency) }}
               </option>
             </select>
-          </label>
-          <label>Modo de financiamiento
+          </FieldHelp>
+          <FieldHelp topic="initialChargeFinancingMode">
+            <template #label>Modo de financiamiento</template>
             <select v-model="editingInitialCharge.financingMode">
               <option v-for="mode in financingModeOptions" :key="mode" :value="mode">
                 {{ formatFinancingModeLabel(mode) }}
               </option>
             </select>
-          </label>
-          <label class="check">
-            <input type="checkbox" v-model="editingInitialCharge.taxable" /> Afecto a impuesto
-          </label>
+          </FieldHelp>
+          <FieldHelp topic="initialChargeTaxable" tag="div">
+            <template #label>Afecto a impuesto</template>
+            <label class="check">
+              <input type="checkbox" v-model="editingInitialCharge.taxable" />
+              <span>Aplica impuesto</span>
+            </label>
+          </FieldHelp>
         </div>
         <div class="dialog-actions">
           <button type="button" class="secondary" @click="closeInitialDialog">Cancelar</button>
           <button type="submit" class="primary">Guardar</button>
         </div>
       </form>
-    </dialog>    <!-- Diálogo para cargo periódico -->
+    </dialog>
+
     <dialog ref="periodicChargeDialog" class="dialog">
-      <form class="dialog-form" @submit.prevent="savePeriodicCharge">        <h2>Cargo periódico</h2>
-        <div class="two-cols">          <label>Código del cargo
+      <form class="dialog-form" @submit.prevent="savePeriodicCharge">
+        <h2>Cargo peri?dico</h2>
+        <div class="two-cols">
+          <FieldHelp topic="periodicChargeCode">
+            <template #label>C?digo del cargo</template>
             <select v-model="editingPeriodicCharge.code">
               <option v-for="code in periodicChargeCodes" :key="code" :value="code">
                 {{ formatChargeCodeLabel(code) }}
               </option>
             </select>
-          </label>
-          <label>Tipo de cargo
+          </FieldHelp>
+          <FieldHelp topic="periodicChargeType">
+            <template #label>Tipo de cargo</template>
             <select v-model="editingPeriodicCharge.chargeType">
               <option v-for="type in chargeTypeOptions" :key="type" :value="type">
                 {{ formatChargeTypeLabel(type) }}
               </option>
             </select>
-          </label>
-          <label>Nombre
+          </FieldHelp>
+          <FieldHelp topic="periodicChargeName">
+            <template #label>Nombre</template>
             <input v-model="editingPeriodicCharge.label" required />
-          </label>
+          </FieldHelp>
           <template v-if="editingPeriodicCharge.chargeType === 'FIXED_AMOUNT'">
-            <label>Monto
+            <FieldHelp topic="periodicChargeAmount">
+              <template #label>Monto</template>
               <input type="number" min="0" step="0.01" v-model.number="editingPeriodicCharge.amount" />
-            </label>
-            <label>Moneda
+            </FieldHelp>
+            <FieldHelp topic="periodicChargeCurrency">
+              <template #label>Moneda</template>
               <select v-model="editingPeriodicCharge.currency">
                 <option v-for="currency in currencyOptions" :key="currency" :value="currency">
                   {{ formatCurrencyLabel(currency) }}
                 </option>
               </select>
-            </label>
+            </FieldHelp>
           </template>
           <template v-if="editingPeriodicCharge.chargeType === 'RATE'">
-            <label>Porcentaje de tasa
+            <FieldHelp topic="periodicChargeRatePercent">
+              <template #label>Porcentaje de tasa</template>
               <input type="number" min="0" step="0.01" v-model.number="editingPeriodicCharge.ratePercent" />
-            </label>
-            <label>Base de la tasa
+            </FieldHelp>
+            <FieldHelp topic="periodicChargeRateBase">
+              <template #label>Base de la tasa</template>
               <select v-model="editingPeriodicCharge.rateBase">
                 <option v-for="base in chargeBaseOptions" :key="base" :value="base">
                   {{ formatChargeBaseLabel(base) }}
                 </option>
               </select>
-            </label>
+            </FieldHelp>
           </template>
-          <label>Frecuencia
+          <FieldHelp topic="periodicChargeFrequency">
+            <template #label>Frecuencia</template>
             <select v-model="editingPeriodicCharge.frequency">
               <option v-for="frequency in frequencyOptions" :key="frequency" :value="frequency">
                 {{ formatFrequencyLabel(frequency) }}
               </option>
             </select>
-          </label>
-          <label>Aplica durante gracia
+          </FieldHelp>
+          <FieldHelp topic="periodicChargeGrace">
+            <template #label>Aplica durante gracia</template>
             <select v-model="editingPeriodicCharge.appliesDuringGrace">
               <option :value="true">{{ formatBooleanLabel(true) }}</option>
               <option :value="false">{{ formatBooleanLabel(false) }}</option>
             </select>
-          </label>
-          <label>Desde la cuota
+          </FieldHelp>
+          <FieldHelp topic="periodicChargeFromInstallment">
+            <template #label>Desde la cuota</template>
             <input type="number" min="1" v-model.number="editingPeriodicCharge.fromInstallment" />
-          </label>
-          <label>Hasta la cuota
+          </FieldHelp>
+          <FieldHelp topic="periodicChargeToInstallment">
+            <template #label>Hasta la cuota</template>
             <input type="number" min="1" v-model.number="editingPeriodicCharge.toInstallment" />
-          </label>
+          </FieldHelp>
         </div>
         <div class="dialog-actions">
           <button type="button" class="secondary" @click="closePeriodicDialog">Cancelar</button>
@@ -360,6 +454,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { loanService } from '../services/loan.service.js'
 import { toastService } from '../../shared/services/toast.service.js'
+import FieldHelp from '../../shared/components/FieldHelp.component.vue'
 import {
   CHARGE_BASES,
   CHARGE_TYPES,
@@ -768,7 +863,7 @@ function normalizeChargeFrequency(value) {
 function buildQuoteRequest() {
   const client = getSelectedClient()
   const vehicle = getSelectedVehicle()
-  if (!client || !vehicle) {    throw new Error('Selecciona primero un cliente y un vehículo.')
+  if (!client || !vehicle) {    throw new Error('Selecciona primero un cliente y un vehículo.')
   }
 
   const termMonths = loan.termMonths

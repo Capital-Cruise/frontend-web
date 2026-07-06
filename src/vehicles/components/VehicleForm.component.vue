@@ -2,16 +2,16 @@
   <div class="register-page">
     <header class="register-header">
       <nav class="breadcrumb" aria-label="Breadcrumb">
-        <button type="button" class="crumb-link" @click="$emit('cancel')">Vehículos</button>
-        <span class="crumb-separator">›</span>
-        <span class="crumb-current">{{ isEdit ? 'Edición' : 'Registro' }}</span>
+        <button type="button" class="crumb-link" @click="$emit('cancel')">Veh?culos</button>
+        <span class="crumb-separator">?</span>
+        <span class="crumb-current">{{ isEdit ? 'Edici?n' : 'Registro' }}</span>
       </nav>
-      <h1>{{ isEdit ? 'Editar vehículo' : 'Registrar nuevo vehículo' }}</h1>
+      <h1>{{ isEdit ? 'Editar veh?culo' : 'Registrar nuevo veh?culo' }}</h1>
       <p>
         {{
           isEdit
-            ? 'Actualiza las especificaciones del activo y su valorización para mantener el portafolio alineado con el mercado.'
-            : 'Registra un nuevo activo en el portafolio con su perfil técnico y valorización comercial para simulaciones de crédito.'
+            ? 'Actualiza las especificaciones del activo y su valorizaci?n para mantener el portafolio alineado con el mercado.'
+            : 'Registra un nuevo activo en el portafolio con su perfil t?cnico y valorizaci?n comercial para simulaciones de cr?dito.'
         }}
       </p>
     </header>
@@ -21,38 +21,35 @@
         <div class="section-title">
           <span class="section-icon">
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM5 11l1.5-4.5h11L19 11H5z"
-                fill="currentColor"
-              />
+              <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM5 11l1.5-4.5h11L19 11H5z" fill="currentColor" />
             </svg>
           </span>
           <h2>Identidad del activo</h2>
         </div>
         <div class="field-grid">
-          <label>
-            Marca
+          <FieldHelp topic="vehicleBrand">
+            <template #label>Marca</template>
             <input ref="firstFieldRef" v-model="form.brand" placeholder="Ej. Porsche" required />
-          </label>
-          <label>
-            Modelo
+          </FieldHelp>
+          <FieldHelp topic="vehicleModel">
+            <template #label>Modelo</template>
             <input v-model="form.model" placeholder="Ej. Taycan" required />
-          </label>
-          <label>
-            Año
+          </FieldHelp>
+          <FieldHelp topic="vehicleYear">
+            <template #label>A?o</template>
             <input v-model.number="form.year" type="number" min="1990" max="2035" required />
-          </label>
-          <label>
-            Tipo de vehículo
+          </FieldHelp>
+          <FieldHelp topic="vehicleType">
+            <template #label>Tipo de veh?culo</template>
             <select v-model="form.vehicleType">
-              <option value="SEDAN">Sedán deportivo</option>
+              <option value="SEDAN">Sed?n deportivo</option>
               <option value="SUV">SUV</option>
               <option value="PICKUP">Pick-up</option>
               <option value="HATCHBACK">Hatchback</option>
               <option value="VAN">Van</option>
               <option value="OTHER">Otro</option>
             </select>
-          </label>
+          </FieldHelp>
         </div>
       </section>
 
@@ -60,23 +57,20 @@
         <div class="section-title">
           <span class="section-icon">
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
-                fill="currentColor"
-              />
+              <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="currentColor" />
             </svg>
           </span>
-          <h2>Imagen y descripción</h2>
+          <h2>Imagen y descripci?n</h2>
         </div>
         <div class="field-grid">
-          <label class="full-width">
-            Descripción
-            <textarea v-model="form.description" placeholder="Notas técnicas, versión, condición..." />
-          </label>
-          <label class="full-width">
-            URL de imagen
+          <FieldHelp topic="vehicleDescription" class="full-width">
+            <template #label>Descripci?n</template>
+            <textarea v-model="form.description" placeholder="Notas t?cnicas, versi?n, condici?n..." />
+          </FieldHelp>
+          <FieldHelp topic="vehicleImageUrl" class="full-width">
+            <template #label>URL de imagen</template>
             <input v-model="form.imageUrl" placeholder="https://..." />
-          </label>
+          </FieldHelp>
         </div>
       </section>
 
@@ -84,36 +78,26 @@
         <div class="section-title">
           <span class="section-icon">
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M3.5 18.5 9 13l3 3 7.5-7.5L22 12.5 12 22.5 3.5 18.5z"
-                fill="currentColor"
-              />
+              <path d="M3.5 18.5 9 13l3 3 7.5-7.5L22 12.5 12 22.5 3.5 18.5z" fill="currentColor" />
             </svg>
           </span>
-          <h2>Valorización comercial</h2>
+          <h2>Valorizaci?n comercial</h2>
         </div>
         <div class="field-grid">
-          <label>
-            Precio comercial
+          <FieldHelp topic="vehicleCommercialPrice">
+            <template #label>Precio comercial</template>
             <div class="money-input">
               <span>$</span>
-              <input
-                v-model.number="form.commercialPrice"
-                type="number"
-                min="0.01"
-                step="0.01"
-                placeholder="0.00"
-                required
-              />
+              <input v-model.number="form.commercialPrice" type="number" min="0.01" step="0.01" placeholder="0.00" required />
             </div>
-          </label>
-          <label>
-            Moneda
+          </FieldHelp>
+          <FieldHelp topic="vehicleCurrency">
+            <template #label>Moneda</template>
             <select v-model="form.currency">
               <option value="USD">USD</option>
               <option value="PEN">PEN</option>
             </select>
-          </label>
+          </FieldHelp>
         </div>
       </section>
 
@@ -121,12 +105,9 @@
         <button type="button" class="cancel-btn" @click="$emit('cancel')">Cancelar</button>
         <button type="submit" class="save-btn" :disabled="loading">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M17 3H5a2 2 0 0 0-2 2v14l4-4h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12H6.17L3 17.17V5h14v10z"
-              fill="currentColor"
-            />
+            <path d="M17 3H5a2 2 0 0 0-2 2v14l4-4h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12H6.17L3 17.17V5h14v10z" fill="currentColor" />
           </svg>
-          {{ loading ? 'Guardando...' : isEdit ? 'Actualizar vehículo' : 'Guardar vehículo' }}
+          {{ loading ? 'Guardando...' : isEdit ? 'Actualizar veh?culo' : 'Guardar veh?culo' }}
         </button>
       </footer>
 
@@ -134,9 +115,9 @@
     </form>
   </div>
 </template>
-
 <script setup>
 import { reactive, ref, computed } from 'vue'
+import FieldHelp from '../../shared/components/FieldHelp.component.vue'
 
 const props = defineProps({
   loading: { type: Boolean, default: false },

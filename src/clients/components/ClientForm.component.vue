@@ -3,15 +3,15 @@
     <header class="register-header">
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <button type="button" class="crumb-link" @click="$emit('cancel')">Clientes</button>
-        <span class="crumb-separator">›</span>
-        <span class="crumb-current">{{ isEdit ? 'Edición' : 'Registro' }}</span>
+        <span class="crumb-separator">?</span>
+        <span class="crumb-current">{{ isEdit ? 'Edici?n' : 'Registro' }}</span>
       </nav>
       <h1>{{ isEdit ? 'Editar cliente' : 'Registrar nuevo cliente' }}</h1>
       <p>
         {{
           isEdit
-            ? 'Actualiza el perfil del cliente y mantén el registro financiero alineado con la información más reciente.'
-            : 'Inicia la simulación de crédito proporcionando el perfil financiero del cliente.'
+            ? 'Actualiza el perfil del cliente y mant?n el registro financiero alineado con la informaci?n m?s reciente.'
+            : 'Inicia la simulaci?n de cr?dito proporcionando el perfil financiero del cliente.'
         }}
       </p>
     </header>
@@ -21,36 +21,33 @@
         <div class="section-title">
           <span class="section-icon">
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.62-9.6 4.8V22h19.2v-2.8c0-3.18-6.4-4.8-9.6-4.8z"
-                fill="currentColor"
-              />
+              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.62-9.6 4.8V22h19.2v-2.8c0-3.18-6.4-4.8-9.6-4.8z" fill="currentColor" />
             </svg>
           </span>
           <h2>Identidad personal</h2>
         </div>
         <div class="field-grid">
-          <label>
-            Nombres
+          <FieldHelp topic="clientFirstName">
+            <template #label>Nombres</template>
             <input ref="firstFieldRef" v-model="form.firstName" placeholder="Ej. Jonathan" required />
-          </label>
-          <label>
-            Apellidos
+          </FieldHelp>
+          <FieldHelp topic="clientLastName">
+            <template #label>Apellidos</template>
             <input v-model="form.lastName" placeholder="Ej. Wick" required />
-          </label>
-          <label>
-            Tipo de documento
+          </FieldHelp>
+          <FieldHelp topic="clientDocumentType">
+            <template #label>Tipo de documento</template>
             <select v-model="form.documentType">
               <option value="DNI">DNI</option>
               <option value="PASSPORT">Pasaporte</option>
-              <option value="CE">Carné de extranjería</option>
+              <option value="CE">Carn? de extranjer?a</option>
               <option value="RUC">RUC</option>
             </select>
-          </label>
-          <label>
-            Número de documento
+          </FieldHelp>
+          <FieldHelp topic="clientDocumentNumber">
+            <template #label>N?mero de documento</template>
             <input v-model="form.documentNumber" placeholder="XX-XXXX-XXXXX" required />
-          </label>
+          </FieldHelp>
         </div>
       </section>
 
@@ -58,27 +55,24 @@
         <div class="section-title">
           <span class="section-icon">
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z"
-                fill="currentColor"
-              />
+              <path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z" fill="currentColor" />
             </svg>
           </span>
-          <h2>Contacto y dirección</h2>
+          <h2>Contacto y direcci?n</h2>
         </div>
         <div class="field-grid">
-          <label>
-            Correo electrónico
+          <FieldHelp topic="clientEmail">
+            <template #label>Correo electr?nico</template>
             <input v-model="form.email" type="email" placeholder="cliente@capitalcruise.com" />
-          </label>
-          <label>
-            Teléfono
+          </FieldHelp>
+          <FieldHelp topic="clientPhone">
+            <template #label>Tel?fono</template>
             <input v-model="form.phone" placeholder="+51 999 999 999" />
-          </label>
-          <label class="full-width">
-            Dirección
-            <input v-model="form.address" placeholder="Calle, número, distrito, ciudad" />
-          </label>
+          </FieldHelp>
+          <FieldHelp topic="clientAddress" class="full-width">
+            <template #label>Direcci?n</template>
+            <input v-model="form.address" placeholder="Calle, n?mero, distrito, ciudad" />
+          </FieldHelp>
         </div>
       </section>
 
@@ -86,36 +80,24 @@
         <div class="section-title">
           <span class="section-icon">
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M3.5 18.5 9 13l3 3 7.5-7.5L22 12.5 12 22.5 3.5 18.5z"
-                fill="currentColor"
-              />
+              <path d="M3.5 18.5 9 13l3 3 7.5-7.5L22 12.5 12 22.5 3.5 18.5z" fill="currentColor" />
             </svg>
           </span>
           <h2>Marco financiero</h2>
         </div>
         <div class="field-grid">
-          <label>
-            Ingreso mensual
+          <FieldHelp topic="clientMonthlyIncome">
+            <template #label>Ingreso mensual</template>
             <div class="money-input">
               <span>S/</span>
-              <input
-                v-model.number="form.monthlyIncome"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-              />
+              <input v-model.number="form.monthlyIncome" type="number" min="0" step="0.01" placeholder="0.00" />
             </div>
-            <small>
-              Este dato es clave para determinar la relación cuota-ingreso y el límite final del
-              perfil crediticio.
-            </small>
-          </label>
-          <label class="full-width">
-            Observaciones
+            <small>Este dato es clave para determinar la relaci?n cuota-ingreso y el l?mite final del perfil crediticio.</small>
+          </FieldHelp>
+          <FieldHelp topic="clientNotes" class="full-width">
+            <template #label>Observaciones</template>
             <textarea v-model="form.notes" placeholder="Anotaciones confidenciales del asesor..." />
-          </label>
+          </FieldHelp>
         </div>
       </section>
 
@@ -123,10 +105,7 @@
         <button type="button" class="cancel-btn" @click="$emit('cancel')">Cancelar</button>
         <button type="submit" class="save-btn" :disabled="loading">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M17 3H5a2 2 0 0 0-2 2v14l4-4h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12H6.17L3 17.17V5h14v10z"
-              fill="currentColor"
-            />
+            <path d="M17 3H5a2 2 0 0 0-2 2v14l4-4h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12H6.17L3 17.17V5h14v10z" fill="currentColor" />
           </svg>
           {{ loading ? 'Guardando...' : isEdit ? 'Actualizar cliente' : 'Guardar cliente' }}
         </button>
@@ -136,9 +115,9 @@
     </form>
   </div>
 </template>
-
 <script setup>
 import { reactive, ref, computed } from 'vue'
+import FieldHelp from '../../shared/components/FieldHelp.component.vue'
 
 const props = defineProps({
   loading: { type: Boolean, default: false },

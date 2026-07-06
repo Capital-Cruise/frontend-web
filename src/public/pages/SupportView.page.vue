@@ -54,6 +54,25 @@
       </div>
     </section>
 
+    <section id="guide" class="support-section">
+      <div class="section-heading">
+        <h2>Guía financiera</h2>
+        <p>Conceptos clave del crédito vehicular y de la ingeniería económica aplicada en Capital Cruise.</p>
+      </div>
+
+      <div class="guide-grid">
+        <article
+          v-for="topic in supportGuideTopics"
+          :id="topic.id"
+          :key="topic.id"
+          class="guide-card"
+        >
+          <h3>{{ topic.title }}</h3>
+          <p>{{ topic.description }}</p>
+        </article>
+      </div>
+    </section>
+
     <section id="contact" class="support-section">
       <div class="section-heading">
         <h2>Contacto y ayuda</h2>
@@ -178,7 +197,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import {
   supportSections,
   faqItems,
@@ -186,6 +205,7 @@ import {
   termsSections,
   supportContactInfo
 } from '../data/support-content.js'
+import { supportGuideTopics } from '../../shared/help/field-help-content.js'
 import { toastService } from '../../shared/services/toast.service.js'
 
 const openFaqIndex = ref(0)
@@ -226,6 +246,11 @@ function submitContactForm() {
   toastService.success(`Mensaje registrado (${categoryLabel}). El equipo de soporte revisará tu solicitud.`)
   resetForm()
 }
+onMounted(() => {
+  if (window.location.hash) {
+    scrollToSection(window.location.hash.replace('#', ''))
+  }
+})
 </script>
 
 <style scoped>
@@ -341,6 +366,35 @@ function submitContactForm() {
   color: #4a5568;
   font-size: 14px;
   line-height: 1.65;
+}
+
+.guide-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.guide-card {
+  scroll-margin-top: 24px;
+  background: #fff;
+  border: 1px solid #e3e8ef;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(8, 38, 74, 0.06);
+}
+
+.guide-card h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: #0b1f3a;
+}
+
+.guide-card p {
+  margin: 0;
+  color: #4a5568;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .contact-grid {

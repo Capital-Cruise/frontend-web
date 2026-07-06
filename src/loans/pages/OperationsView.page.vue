@@ -23,24 +23,24 @@
     </header>
 
     <section class="filters-panel" aria-label="Filtros de operaciones">
-      <label>
-        <span>Nombre del cliente</span>
+      <FieldHelp topic="operationClientFilter">
+        <template #label>Nombre del cliente</template>
         <input
           v-model="filters.client"
           type="search"
           placeholder="Filtrar por cliente..."
           @input="applyClientFilter"
         />
-      </label>
+      </FieldHelp>
 
-      <label>
-        <span>Moneda</span>
+      <FieldHelp topic="operationCurrencyFilter">
+        <template #label>Moneda</template>
         <select v-model="filters.currency" @change="loadOperations(0)">
           <option value="">Todas las monedas</option>
-          <option value="USD">Dólares</option>
+          <option value="USD">D?lares</option>
           <option value="PEN">Soles</option>
         </select>
-      </label>
+      </FieldHelp>
 
       <button class="clear-btn" type="button" :disabled="!hasFilters" @click="clearFilters">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"/></svg>
@@ -128,6 +128,7 @@ import { useRouter } from 'vue-router'
 import { loanService } from '../services/loan.service.js'
 import { toastService } from '../../shared/services/toast.service.js'
 import { formatOperationStatusLabel } from '../../shared/utils/loan-labels.js'
+import FieldHelp from '../../shared/components/FieldHelp.component.vue'
 
 const router = useRouter()
 

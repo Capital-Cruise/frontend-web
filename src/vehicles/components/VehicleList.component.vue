@@ -17,8 +17,8 @@
     </header>
 
     <section class="filters-card">
-      <label class="filter-field search-field">
-        <span>Buscar en la base</span>
+      <FieldHelp topic="vehicleSearchFilter" class="filter-field search-field">
+        <template #label>Buscar en la base</template>
         <div class="search-input">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -33,35 +33,26 @@
             @input="$emit('filter-change', { ...filters, search: $event.target.value })"
           />
         </div>
-      </label>
-      <label class="filter-field">
-        <span>Marca</span>
-        <select
-          :value="filters.brand"
-          @change="$emit('filter-change', { ...filters, brand: $event.target.value })"
-        >
+      </FieldHelp>
+      <FieldHelp topic="vehicleBrandFilter" class="filter-field">
+        <template #label>Marca</template>
+        <select :value="filters.brand" @change="$emit('filter-change', { ...filters, brand: $event.target.value })">
           <option value="">Todas las marcas</option>
           <option v-for="brand in brands" :key="brand" :value="brand">{{ brand }}</option>
         </select>
-      </label>
-      <label class="filter-field">
-        <span>Año</span>
-        <select
-          :value="filters.year"
-          @change="$emit('filter-change', { ...filters, year: $event.target.value })"
-        >
+      </FieldHelp>
+      <FieldHelp topic="vehicleYearFilter" class="filter-field">
+        <template #label>A?o</template>
+        <select :value="filters.year" @change="$emit('filter-change', { ...filters, year: $event.target.value })">
           <option value="">Todos</option>
           <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
         </select>
-      </label>
+      </FieldHelp>
       <button type="button" class="filters-btn" @click="$emit('reset-filters')">
         <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"
-            fill="currentColor"
-          />
+          <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor" />
         </svg>
-        Más filtros
+        M?s filtros
       </button>
     </section>
 
@@ -145,6 +136,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { fallbackVehicleImage, resolveVehicleImage } from '../utils/vehicle-image.util.js'
+import FieldHelp from '../../shared/components/FieldHelp.component.vue'
 
 const props = defineProps({
   vehicles: { type: Array, default: () => [] },

@@ -1,5 +1,6 @@
 export const supportSections = [
   { id: 'faq', label: 'Preguntas frecuentes' },
+  { id: 'guide', label: 'Guía financiera' },
   { id: 'contact', label: 'Contacto y ayuda' },
   { id: 'terms', label: 'Términos y condiciones' }
 ]
