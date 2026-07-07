@@ -17,6 +17,14 @@
       <article v-for="(item, idx) in summaryCards" :key="idx" class="card metric">
         <span>{{ item.label }}</span>
         <strong>{{ item.value }}</strong>
+        <small v-if="item.note">{{ item.note }}</small>
+      </article>
+    </div>
+
+    <div v-if="indicatorCards.length" id="indicatorCards" class="grid cards-4 indicator-grid">
+      <article v-for="(item, idx) in indicatorCards" :key="idx" class="card metric">
+        <span>{{ item.label }}</span>
+        <strong>{{ item.value }}</strong>
       </article>
     </div>
 
@@ -39,7 +47,7 @@
               <tr v-for="(charge, i) in initialCharges" :key="i">
                 <td>{{ formatChargeCodeLabel(charge.code) }}</td>
                 <td>{{ charge.label }}</td>
-                <td>{{ formatMoney(charge.amount, charge.currency) }}</td>
+                <td>{{ formatAmountValue(charge.amount, charge.currency || currency) }}</td>
                 <td>{{ formatFinancingModeLabel(charge.financingMode) }}</td>
                 <td>{{ effectOfFinancing(charge.financingMode) }}</td>
               </tr>
@@ -80,7 +88,7 @@
               <td>{{ formatChargeCodeLabel(charge.code) }}</td>
               <td>{{ charge.label }}</td>
               <td>{{ formatChargeTypeLabel(charge.chargeType) }}</td>
-              <td>{{ charge.chargeType === 'FIXED_AMOUNT' ? formatMoney(charge.amount, charge.currency) : formatPercent(charge.ratePercent) }}</td>
+              <td>{{ charge.chargeType === 'FIXED_AMOUNT' ? formatAmountValue(charge.amount, charge.currency || currency) : formatPercentValue(charge.ratePercent) }}</td>
               <td>{{ formatChargeBaseLabel(charge.rateBase) }}</td>
               <td>{{ formatFrequencyLabel(charge.frequency) }}</td>
               <td>{{ formatInstallmentRangeLabel(charge.fromInstallment, charge.toInstallment) }}</td>
@@ -115,14 +123,14 @@
               <td>{{ row.installmentNumber }}</td>
               <td>{{ row.dueDate }}</td>
               <td>{{ formatGraceTypeLabel(row.graceTypeApplied) }}</td>
-              <td>{{ formatMoney(row.openingBalance) }}</td>
-              <td>{{ formatMoney(row.interest) }}</td>
-              <td>{{ formatMoney(row.baseInstallment) }}</td>
-              <td>{{ formatMoney(row.insuranceAmount) }}</td>
-              <td>{{ formatMoney(row.additionalChargeAmount) }}</td>
-              <td>{{ formatMoney(row.balloonPortion) }}</td>
-              <td>{{ formatMoney(row.totalInstallment) }}</td>
-              <td>{{ formatMoney(row.closingBalance) }}</td>
+              <td>{{ formatAmountValue(row.openingBalance, currency) }}</td>
+              <td>{{ formatAmountValue(row.interest, currency) }}</td>
+              <td>{{ formatAmountValue(row.baseInstallment, currency) }}</td>
+              <td>{{ formatAmountValue(row.insuranceAmount, currency) }}</td>
+              <td>{{ formatAmountValue(row.additionalChargeAmount, currency) }}</td>
+              <td>{{ formatAmountValue(row.balloonPortion, currency) }}</td>
+              <td>{{ formatAmountValue(row.totalInstallment, currency) }}</td>
+              <td>{{ formatAmountValue(row.closingBalance, currency) }}</td>
             </tr>
           </tbody>
         </table>
@@ -134,6 +142,11 @@
 
 <script setup>
 import { computed } from 'vue'
+import {
+  formatAmountValue,
+  formatBooleanValue,
+  formatPercentValue
+} from '../../shared/utils/financial-format.js'
 import {
   formatChargeBaseLabel,
   formatChargeCodeLabel,
@@ -157,10 +170,17 @@ const summary = computed(() => calc.value?.summary || props.calculation?.summary
 const indicators = computed(() => calc.value?.indicators || props.calculation?.indicators || {})
 const schedule = computed(() => calc.value?.schedule || props.calculation?.schedule || [])
 
+const currency = computed(() =>
+  props.request?.loan?.operationCurrency ||
+  summary.value.currency ||
+  summary.value.operationCurrency ||
+  'USD'
+)
+
 const subtitle = computed(() => {
   const req = props.request
   if (req) {
-    return `${req.client?.displayName || 'Cliente'} · ${req.vehicle?.brand || ''} ${req.vehicle?.model || ''}`
+    return `${req.client?.displayName || 'Cliente'} · ${req.vehicle?.brand || ''} ${req.vehicle?.model || ''}`.trim()
   }
   return 'No hay una simulación cargada.'
 })
@@ -169,37 +189,42 @@ const initialCharges = computed(() => props.request?.additionalCharges?.initialC
 const periodicCharges = computed(() => props.request?.additionalCharges?.periodicCharges || [])
 
 const summaryCards = computed(() => [
-  { label: 'Precio del vehículo', value: formatMoney(summary.value.vehiclePrice ?? props.request?.vehicle?.vehiclePrice, props.request?.loan?.operationCurrency) },
-  { label: 'Cuota inicial', value: formatMoney(summary.value.downPaymentAmount, props.request?.loan?.operationCurrency) },
-  { label: 'Cargos iniciales financiados', value: formatMoney(summary.value.initialChargesFinanced, props.request?.loan?.operationCurrency) },
-  { label: 'Principal financiado', value: formatMoney(summary.value.principalFinanced, props.request?.loan?.operationCurrency) },
-  { label: 'Cuota balloon', value: formatMoney(summary.value.balloonAmount, props.request?.loan?.operationCurrency) },
-  { label: 'Cuota base', value: formatMoney(summary.value.baseInstallment, props.request?.loan?.operationCurrency) },
-  { label: 'Total a pagar', value: formatMoney(summary.value.totalPayable, props.request?.loan?.operationCurrency) },
-  { label: 'TCEA', value: formatPercent((indicators.value.effectiveAnnualCost ?? 0) * (Math.abs(indicators.value.effectiveAnnualCost ?? 0) < 1 ? 100 : 1)) }
+  { label: 'Precio del vehículo', value: formatAmountValue(summary.value.vehiclePrice ?? props.request?.vehicle?.vehiclePrice, currency.value) },
+  { label: 'Cuota inicial', value: formatAmountValue(summary.value.downPaymentAmount, currency.value) },
+  { label: 'Cargos iniciales financiados', value: formatAmountValue(summary.value.initialChargesFinanced, currency.value) },
+  { label: 'Principal financiado', value: formatAmountValue(summary.value.principalFinanced, currency.value) },
+  { label: 'Cuota balloon', value: formatAmountValue(summary.value.balloonAmount, currency.value) },
+  { label: 'Cuota base', value: formatAmountValue(summary.value.baseInstallment, currency.value) },
+  { label: 'Total a pagar', value: formatAmountValue(summary.value.totalPayable, currency.value) },
+  { label: 'TCEA', value: formatPercentValue(indicators.value.effectiveAnnualCost) }
 ])
 
-const totals = computed(() => {
-  const currency = props.request?.loan?.operationCurrency || 'USD'
-  return [
-    { label: 'Principal', value: formatMoney(summary.value.principalFinanced, currency) },
-    { label: 'Interés', value: formatMoney(summary.value.totalInterest, currency) },
-    { label: 'Cargos periódicos', value: formatMoney(summary.value.totalPeriodicCharges, currency) },
-    { label: 'Seguros', value: formatMoney(summary.value.totalInsurance, currency) },
-    { label: 'Balloon', value: formatMoney(summary.value.balloonAmount, currency) },
-    { label: 'Total a pagar', value: formatMoney(summary.value.totalPayable, currency), danger: true }
+const indicatorCards = computed(() => {
+  const cards = [
+    { label: 'VAN', value: formatAmountValue(indicators.value.npv, currency.value) },
+    { label: 'TIR mensual', value: formatPercentValue(indicators.value.irrMonthly) },
+    { label: 'TIR anual', value: formatPercentValue(indicators.value.irrAnnual) },
+    { label: 'TIR calculada', value: formatBooleanValue(indicators.value.irrConverged) }
   ]
+
+  const cokValue = indicators.value.cok ?? indicators.value.discountRate ?? indicators.value.costOfCapital
+  if (cokValue !== null && cokValue !== undefined && cokValue !== '') {
+    cards.splice(3, 0, { label: 'COK', value: formatPercentValue(cokValue) })
+  }
+
+  return cards
 })
 
-function formatMoney(value, currency = 'USD') {
-  const n = Number(value ?? 0)
-  return `${currency} ${n.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-}
-
-function formatPercent(value) {
-  const n = Number(value ?? 0)
-  return `${n.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
-}
+const totals = computed(() => {
+  return [
+    { label: 'Principal', value: formatAmountValue(summary.value.principalFinanced, currency.value) },
+    { label: 'Interés', value: formatAmountValue(summary.value.totalInterest, currency.value) },
+    { label: 'Cargos periódicos', value: formatAmountValue(summary.value.totalPeriodicCharges, currency.value) },
+    { label: 'Seguros', value: formatAmountValue(summary.value.totalInsurance, currency.value) },
+    { label: 'Balloon', value: formatAmountValue(summary.value.balloonAmount, currency.value) },
+    { label: 'Total a pagar', value: formatAmountValue(summary.value.totalPayable, currency.value), danger: true }
+  ]
+})
 
 function effectOfFinancing(mode) {
   if (mode === 'FINANCED') return 'Se suma al principal'
@@ -242,6 +267,9 @@ function effectOfFinancing(mode) {
 .cards-4 {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
+.indicator-grid {
+  margin-top: 16px;
+}
 .metric {
   border-left: 3px solid #a9c9ff;
 }
@@ -256,6 +284,11 @@ function effectOfFinancing(mode) {
   display: block;
   margin-top: 8px;
   font-size: 20px;
+}
+.metric small {
+  display: block;
+  margin-top: 4px;
+  color: #6f7d8f;
 }
 .split {
   display: grid;
@@ -323,6 +356,7 @@ function effectOfFinancing(mode) {
   justify-content: space-between;
   border-bottom: 1px solid #e3e8ef;
   padding: 8px 0;
+  gap: 16px;
 }
 .meta {
   color: #6f7d8f;

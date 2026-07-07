@@ -22,8 +22,14 @@
     </div>
 
     <section class="card">
-      <h2>JSON de la operación</h2>
-      <pre class="debug">{{ JSON.stringify(detail, null, 2) }}</pre>
+      <h2>Indicadores</h2>
+      <div v-if="indicatorCards.length === 0">No hay indicadores disponibles.</div>
+      <div v-else class="grid cards-4">
+        <article v-for="(item, idx) in indicatorCards" :key="idx" class="card metric metric-compact">
+          <span>{{ item.label }}</span>
+          <strong>{{ item.value }}</strong>
+        </article>
+      </div>
     </section>
 
     <section class="card">
@@ -66,10 +72,6 @@
       </div>
     </section>
 
-    <section class="card">
-      <h2>Indicadores</h2>
-      <pre class="debug">{{ JSON.stringify(indicators, null, 2) }}</pre>
-    </section>
   </div>
 </template>
 
@@ -78,6 +80,11 @@ import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { loanService } from '../services/loan.service.js'
 import { toastService } from '../../shared/services/toast.service.js'
+import {
+  formatAmountValue,
+  formatBooleanValue,
+  formatPercentValue
+} from '../../shared/utils/financial-format.js'
 import { formatGraceTypeLabel } from '../../shared/utils/loan-labels.js'
 
 const route = useRoute()
@@ -94,6 +101,24 @@ const detailCards = computed(() => {
     { label: 'Moneda', value: d.currency || d.operationCurrency || '--' },
     { label: 'Filas del cronograma', value: Array.isArray(schedule.value) ? schedule.value.length : '--' }
   ]
+})
+
+const indicatorCards = computed(() => {
+  const data = indicators.value || {}
+  const cards = [
+    { label: 'VAN', value: formatAmountValue(data.npv, detail.value?.currency || detail.value?.operationCurrency) },
+    { label: 'TIR mensual', value: formatPercentValue(data.irrMonthly) },
+    { label: 'TIR anual', value: formatPercentValue(data.irrAnnual) },
+    { label: 'TCEA', value: formatPercentValue(data.effectiveAnnualCost) },
+    { label: 'TIR calculada', value: formatBooleanValue(data.irrConverged) }
+  ]
+
+  const cokValue = data.cok ?? data.discountRate ?? data.costOfCapital
+  if (cokValue !== null && cokValue !== undefined && cokValue !== '') {
+    cards.splice(3, 0, { label: 'COK', value: formatPercentValue(cokValue) })
+  }
+
+  return cards
 })
 
 async function loadDetail() {
@@ -129,8 +154,7 @@ async function createShare() {
 }
 
 function formatMoney(value, currency = 'USD') {
-  const n = Number(value ?? 0)
-  return `${currency} ${n.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  return formatAmountValue(value, currency)
 }
 
 if (route.params.id) {
@@ -229,6 +253,9 @@ input:focus {
   margin-top: 8px;
   font-size: 20px;
 }
+.metric-compact {
+  margin-bottom: 0;
+}
 .mini-table table {
   width: 100%;
   border-collapse: collapse;
@@ -247,13 +274,6 @@ input:focus {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-}
-.debug {
-  margin: 0;
-  background: #f7f9fc;
-  border-radius: 10px;
-  padding: 16px;
-  overflow: auto;
 }
 .hint {
   font-size: 13px;
