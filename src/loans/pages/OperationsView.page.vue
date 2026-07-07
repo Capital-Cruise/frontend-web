@@ -37,7 +37,7 @@
         <template #label>Moneda</template>
         <select v-model="filters.currency" @change="loadOperations(0)">
           <option value="">Todas las monedas</option>
-          <option value="USD">D?lares</option>
+          <option value="USD">Dólares</option>
           <option value="PEN">Soles</option>
         </select>
       </FieldHelp>

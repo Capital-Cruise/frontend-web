@@ -195,13 +195,13 @@ onBeforeUnmount(() => {
 }
 
 .field-help__icon {
-  width: 20px;
-  height: 20px;
-  border: 1px solid #c7d6ea;
-  border-radius: 999px;
-  background: #f8fbff;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: #0b4f9c;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   line-height: 1;
   cursor: pointer;
@@ -209,13 +209,13 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  padding: 0;
 }
 
 .field-help__icon:hover,
 .field-help__icon:focus-visible,
 .field-help--open .field-help__icon {
-  border-color: #7ea6e6;
-  background: #eaf2ff;
+  color: #083b74;
   outline: none;
 }
 

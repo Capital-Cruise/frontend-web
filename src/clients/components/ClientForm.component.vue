@@ -3,15 +3,15 @@
     <header class="register-header">
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <button type="button" class="crumb-link" @click="$emit('cancel')">Clientes</button>
-        <span class="crumb-separator">?</span>
-        <span class="crumb-current">{{ isEdit ? 'Edici?n' : 'Registro' }}</span>
+        <span class="crumb-separator">›</span>
+        <span class="crumb-current">{{ isEdit ? 'Edición' : 'Registro' }}</span>
       </nav>
       <h1>{{ isEdit ? 'Editar cliente' : 'Registrar nuevo cliente' }}</h1>
       <p>
         {{
           isEdit
-            ? 'Actualiza el perfil del cliente y mant?n el registro financiero alineado con la informaci?n m?s reciente.'
-            : 'Inicia la simulaci?n de cr?dito proporcionando el perfil financiero del cliente.'
+            ? 'Actualiza el perfil del cliente y mantén el registro financiero alineado con la información más reciente.'
+            : 'Inicia la simulación de crédito proporcionando el perfil financiero del cliente.'
         }}
       </p>
     </header>
@@ -40,12 +40,12 @@
             <select v-model="form.documentType">
               <option value="DNI">DNI</option>
               <option value="PASSPORT">Pasaporte</option>
-              <option value="CE">Carn? de extranjer?a</option>
+              <option value="CE">Carné de extranjería</option>
               <option value="RUC">RUC</option>
             </select>
           </FieldHelp>
           <FieldHelp topic="clientDocumentNumber">
-            <template #label>N?mero de documento</template>
+            <template #label>Número de documento</template>
             <input v-model="form.documentNumber" placeholder="XX-XXXX-XXXXX" required />
           </FieldHelp>
         </div>
@@ -58,20 +58,20 @@
               <path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z" fill="currentColor" />
             </svg>
           </span>
-          <h2>Contacto y direcci?n</h2>
+          <h2>Contacto y dirección</h2>
         </div>
         <div class="field-grid">
           <FieldHelp topic="clientEmail">
-            <template #label>Correo electr?nico</template>
+            <template #label>Correo electrónico</template>
             <input v-model="form.email" type="email" placeholder="cliente@capitalcruise.com" />
           </FieldHelp>
           <FieldHelp topic="clientPhone">
-            <template #label>Tel?fono</template>
+            <template #label>Teléfono</template>
             <input v-model="form.phone" placeholder="+51 999 999 999" />
           </FieldHelp>
           <FieldHelp topic="clientAddress" class="full-width">
-            <template #label>Direcci?n</template>
-            <input v-model="form.address" placeholder="Calle, n?mero, distrito, ciudad" />
+            <template #label>Dirección</template>
+            <input v-model="form.address" placeholder="Calle, número, distrito, ciudad" />
           </FieldHelp>
         </div>
       </section>
@@ -92,7 +92,7 @@
               <span>S/</span>
               <input v-model.number="form.monthlyIncome" type="number" min="0" step="0.01" placeholder="0.00" />
             </div>
-            <small>Este dato es clave para determinar la relaci?n cuota-ingreso y el l?mite final del perfil crediticio.</small>
+            <small>Este dato es clave para determinar la relación cuota-ingreso y el límite final del perfil crediticio.</small>
           </FieldHelp>
           <FieldHelp topic="clientNotes" class="full-width">
             <template #label>Observaciones</template>
