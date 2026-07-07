@@ -32,7 +32,9 @@ import { useRoute, useRouter } from 'vue-router'
 import VehicleList from '../components/VehicleList.component.vue'
 import VehicleForm from '../components/VehicleForm.component.vue'
 import { vehicleService } from '../services/vehicle.service.js'
+import { resolveVehicleImage } from '../utils/vehicle-image.util.js'
 import { toastService } from '../../shared/services/toast.service.js'
+import { warmImageCache } from '../../shared/utils/image-cache.util.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -90,6 +92,7 @@ async function loadVehicles() {
       brand: filters.value.brand
     })
     allVehicles.value = result.vehicles
+    warmVisibleVehicleImages(result.vehicles)
 
     if (page.value >= filteredTotalPages.value) {
       page.value = Math.max(filteredTotalPages.value - 1, 0)
@@ -99,6 +102,11 @@ async function loadVehicles() {
   } finally {
     loading.value = false
   }
+}
+
+function warmVisibleVehicleImages(vehicles) {
+  const imageSources = (vehicles || []).map((vehicle) => resolveVehicleImage(vehicle))
+  warmImageCache(imageSources).catch(() => {})
 }
 
 function goToRegister() {

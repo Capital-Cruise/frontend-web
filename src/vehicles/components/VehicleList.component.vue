@@ -42,7 +42,7 @@
         </select>
       </FieldHelp>
       <FieldHelp topic="vehicleYearFilter" class="filter-field">
-        <template #label>A?o</template>
+        <template #label>Año</template>
         <select :value="filters.year" @change="$emit('filter-change', { ...filters, year: $event.target.value })">
           <option value="">Todos</option>
           <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
@@ -52,7 +52,7 @@
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor" />
         </svg>
-        M?s filtros
+        Más filtros
       </button>
     </section>
 
@@ -63,10 +63,11 @@
     <section v-else class="vehicle-grid">
       <article v-for="vehicle in vehicles" :key="vehicle.identifier" class="vehicle-card">
         <div class="vehicle-image-wrap">
-          <img
+          <CachedImage
             :src="imageFor(vehicle)"
+            :fallback-src="fallbackVehicleImage(vehicle.vehicleType)"
             :alt="vehicle.cardTitle"
-            class="vehicle-image"
+            class-name="vehicle-image"
             loading="lazy"
             @error="onImageError(vehicle)"
           />
@@ -137,6 +138,7 @@
 import { computed, ref } from 'vue'
 import { fallbackVehicleImage, resolveVehicleImage } from '../utils/vehicle-image.util.js'
 import FieldHelp from '../../shared/components/FieldHelp.component.vue'
+import CachedImage from '../../shared/components/CachedImage.component.vue'
 
 const props = defineProps({
   vehicles: { type: Array, default: () => [] },

@@ -1272,6 +1272,7 @@ input:focus, select:focus {
   position: sticky;
   top: 24px;
   width: 100%;
+  min-width: 0;
 }
 .side-card {
   background: #ffffff;
@@ -1414,12 +1415,15 @@ input:focus, select:focus {
 .check input {
   width: auto;
 }
-@media (max-width: 1180px) {
+@media (max-width: 1320px) {
   .layout-quote {
     grid-template-columns: 1fr;
   }
   .right-rail {
     position: static;
+  }
+  .left-stack {
+    min-width: 0;
   }
 }
 @media (max-width: 760px) {
