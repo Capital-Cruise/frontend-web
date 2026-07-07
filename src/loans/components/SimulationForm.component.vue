@@ -1062,8 +1062,8 @@ onMounted(() => {
 }
 .layout-quote {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 32px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 22vw, 340px);
+  gap: 24px;
   align-items: start;
   max-width: none;
   width: 100%;
@@ -1243,32 +1243,37 @@ input:focus, select:focus {
 }
 .summary-panel {
   display: grid;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
+  padding: 18px;
+}
+.summary-panel h2 {
+  margin-bottom: 8px;
+  font-size: 14px;
 }
 .summary-metric strong {
-  font-size: 32px;
+  font-size: 28px;
   display: block;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 12px;
   border-top: 1px solid rgba(255,255,255,0.18);
-  padding-top: 14px;
+  padding-top: 12px;
 }
 .summary-grid div {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 .summary-grid strong {
   color: #ffffff;
-  font-size: 13px;
+  font-size: 12px;
 }
 .right-rail {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   position: sticky;
   top: 24px;
   width: 100%;
@@ -1278,7 +1283,7 @@ input:focus, select:focus {
   background: #ffffff;
   border: 1px solid #edf1f6;
   border-radius: 8px;
-  padding: 16px;
+  padding: 14px;
   box-shadow: 0 8px 20px rgba(8, 38, 74, 0.05);
 }
 .side-title {
@@ -1303,7 +1308,7 @@ input:focus, select:focus {
   grid-template-columns: auto auto auto 1fr;
   align-items: center;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 12px;
 }
 .exchange-row span {
   background: #eef3f8;
@@ -1332,8 +1337,8 @@ input:focus, select:focus {
   cursor: pointer;
   font-size: 12px;
   font-weight: 800;
-  margin-top: 12px;
-  padding: 9px 12px;
+  margin-top: 10px;
+  padding: 8px 12px;
 }
 .exchange-refresh:disabled {
   opacity: 0.6;
@@ -1415,7 +1420,7 @@ input:focus, select:focus {
 .check input {
   width: auto;
 }
-@media (max-width: 1320px) {
+@media (max-width: 900px) {
   .layout-quote {
     grid-template-columns: 1fr;
   }
